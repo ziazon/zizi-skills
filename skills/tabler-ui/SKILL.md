@@ -32,6 +32,7 @@ dead carousels, unstyled prod buttons):
 | Form inputs, validation display, filter UIs (operator pickers, chip bars), date display | [forms-filters.md](forms-filters.md) — the generic vuelidate-wired field widgets and their model quirks |
 | Grid/column layout, badges/status pills, icons, table empty/error states, hero/eyebrow type | [layout-visuals.md](layout-visuals.md) |
 | Email templates or a non-Vue Tabler stack (R/Shiny) | [emails-other-stacks.md](emails-other-stacks.md) |
+| Right-to-left locales — Tabler ships separate RTL stylesheets (`tabler.rtl.css`, `tabler.rtl.min.css`, and `*.rtl.css` for each add-on bundle); load them when `dir="rtl"` | [i18n](../i18n/SKILL.md) §8 owns the `lang`/`dir` contract, logical properties and the RTL sweep |
 | Copying markup from the reference bundle, upgrading `@tabler/core`, a Tabler class or `--tblr-*` token that does nothing, or any v1.6 component (datepicker, OTP, sparkline, legend…) | [versions.md](versions.md) — bundle-vs-app version gap, and the v1.6 changes that bite |
 
 `LEARNINGS.md` beside this skill, when your copy keeps one, holds only raw,
@@ -104,6 +105,10 @@ not-yet-promoted captures — check it too when working in an area touched recen
 - [ ] Reused the app's existing wrappers (modal, dropdown, shared form fields).
 - [ ] Verified in BOTH light and dark mode, with inline screenshots.
 - [ ] If class names are composed dynamically: verified against the BUILT output.
+
+## Related skills
+
+- [code-quality](../code-quality/SKILL.md): the hard rules every component is held to — one responsibility per file, readable by a junior engineer, and one rhythm per kind of work; a single-file component's three blocks are the only exception to the first.
 
 ## Capturing learnings (session-handoff protocol)
 

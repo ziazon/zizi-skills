@@ -185,6 +185,7 @@ discipline is: learn the layout, mirror conventions, validate before apply.
 ## Related skills
 
 - [security-and-hardening](../security-and-hardening/SKILL.md): what CI, container and secrets changes must guarantee, and where each control fires.
+- [code-quality](../code-quality/SKILL.md): the hard rules every script, workflow and job-spec diff meets — one responsibility per file, readable by a junior engineer, and one rhythm per kind of work.
 
 ## Capturing learnings (session-handoff protocol)
 

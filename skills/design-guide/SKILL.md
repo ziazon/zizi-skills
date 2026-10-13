@@ -108,6 +108,9 @@ user gets professional-looking results without having to drive the aesthetics.
   mode (e.g. a third-party sign-in button rendering white-on-white until wrapped in
   `color-scheme: light`; the originating ticket: `LOCAL.md` beside this skill, when your
   copy keeps one — *Dark-mode sign-in button*).
+- **Designing at English length only** — in a multi-language product, labels run 30–40%
+  longer and RTL mirrors the layout; judge the design in the longest locale and in RTL
+  ([i18n](../i18n/SKILL.md) §8 and its pseudo-locale sweep).
 - **Offering the user a menu of options with no recommendation** — the user is
   design-averse; decide, recommend one, explain in a line.
 

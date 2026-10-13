@@ -73,6 +73,7 @@ The patterns behind each step, with their caveats:
 ## Related skills
 
 - [deprecation-and-migration](../deprecation-and-migration/SKILL.md): the mechanics of moving logic off a legacy service once this skill has decided where it lands.
+- [code-quality](../code-quality/SKILL.md): the hard rules every backend diff meets — one responsibility per file, readable by a junior engineer, and one rhythm per kind of work (every endpoint moves data through the same stages).
 
 ## Capturing learnings
 

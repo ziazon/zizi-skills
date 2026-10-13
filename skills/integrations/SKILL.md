@@ -169,6 +169,7 @@ framed as a concrete feature request. Future integrations get easier.
 ## Related skills
 
 - [security-and-hardening](../security-and-hardening/SKILL.md): a new integration or inbound webhook is a security trigger path; secrets handling follows that skill.
+- [code-quality](../code-quality/SKILL.md): the hard rules every client, webhook handler and automation diff meets — one responsibility per file, readable by a junior engineer, and one rhythm per kind of work.
 
 ## Capturing learnings (session-handoff protocol)
 

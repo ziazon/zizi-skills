@@ -360,6 +360,7 @@ Skip trivial passthroughs and pure config; a test there is noise.
 - [database-optimization](../database-optimization/SKILL.md): a DB-touching change needs a real-database run; that skill says how to live-verify a query.
 - [orchestration](../orchestration/SKILL.md): review a delegate's tests as adversarially as its implementation.
 - [monitoring](../monitoring/SKILL.md): when a unit test cannot see the behavior, verify it on the live stack.
+- [code-quality](../code-quality/SKILL.md): its *Reviewing a diff* checklist reads the tests first and treats a loosened assertion as a finding; the hard rules apply to test files too.
 
 ## Capturing learnings (session-handoff protocol)
 

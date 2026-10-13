@@ -140,6 +140,7 @@ is infrastructure.
 ## Related skills
 
 - [debugging-and-error-recovery](../debugging-and-error-recovery/SKILL.md): diagnosing a failure this skill's logs and signals surfaced.
+- [code-quality](../code-quality/SKILL.md): the hard rules every instrumentation and alerting diff meets — one responsibility per file, readable by a junior engineer, and one rhythm per kind of work.
 
 ## Capturing learnings (session-handoff protocol)
 

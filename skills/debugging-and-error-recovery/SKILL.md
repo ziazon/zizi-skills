@@ -170,3 +170,4 @@ After fixing a bug:
 ## Related skills
 
 - [source-driven-development](../source-driven-development/SKILL.md): verify library behavior against the installed source and docs, never from memory.
+- [code-quality](../code-quality/SKILL.md): a fix is a diff like any other — the hard rules apply, and *Reviewing a diff* says how error paths are written.

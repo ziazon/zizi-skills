@@ -1,11 +1,12 @@
 ---
 name: code-quality
 description: >
-  Use when improving or reviewing code quality, style, and dead-code hygiene —
-  readability, naming, consistency with surrounding code, and removing unused
-  code. Invoke whenever asked to "remove dead code", clean up, tidy, or
-  de-duplicate, and load it as the standards behind any cleanup or review pass.
-  Its core discipline is proving code is TRULY dead (no dynamic, reflective,
+  Use whenever a diff is reviewed or code is cleaned up — reviewing your own diff
+  before commit, a delegated agent's returned diff, or a colleague's PR; and
+  whenever asked to clean up, tidy, de-duplicate, or remove dead code. Holds the
+  hard rules every diff is held to (one responsibility per file, readable by a
+  junior engineer, one rhythm per kind of work), the diff-review checklist, and
+  the deletion discipline: prove code is TRULY dead (no dynamic, reflective,
   cross-package, or convention-based use) before deleting anything. This is the
   knowledge/discipline skill — to actually RUN a review of the current diff use
   the /code-review command, and to apply reuse/simplification fixes use
@@ -14,10 +15,10 @@ description: >
 
 # Code Quality
 
-Goal: raise readability, consistency, and tidiness of the code, and remove dead
-code — **without ever deleting something that is actually used.** When in doubt,
-do not delete; flag it instead. A false-positive deletion (removing live code)
-is far worse than leaving one dead function in place.
+Goal: every diff meets the hard rules below and reads like the rest of the codebase,
+and dead code goes — **without ever deleting something that is actually used.** When
+in doubt, do not delete; flag it instead. A false-positive deletion (removing live
+code) is far worse than leaving one dead function in place.
 
 > **Who writes the code:** if implementation is delegated to another agent, this
 > skill is the standard the reviewing agent holds the work to, not a licence to edit
@@ -27,23 +28,66 @@ is far worse than leaving one dead function in place.
 > inline.) Who executes in this install: `LOCAL.md` beside this skill, when your
 > copy keeps one — *Who writes the code*.
 
+## Hard rules — every diff, whoever wrote it
+
+These are not style preferences. A diff that breaks one gets a **Required** finding,
+and a brief to an implementing agent names all three.
+
+1. **One responsibility per file.** A file has one reason to change. A file that both
+   decides and coordinates (business logic plus orchestration), or that serves two
+   features, is two files.
+   - **The one exception is a single-file component** (a Vue SFC and the like), which
+     holds template, script and style together. Even there, move the logic out into
+     composables (or the stack's equivalent) and split the component into children,
+     so no single component carries a whole screen — unless its complexity really
+     demands it. Keep the extraction performant: no extra reactive layers or watchers
+     just to split.
+   - **Size cue (soft):** past ~200 lines for a component file or ~300 for any other
+     file, the reviewer must say why it still has one responsibility, or split it.
+     The number prompts the look; the one-reason-to-change test decides.
+2. **Readable by a junior engineer.** A junior engineer can follow the functional flow
+   without asking anyone. The flow is clean, simple and consistent.
+   - Names say what a thing is or does; booleans read as predicates; no
+     abbreviations the codebase doesn't already use; avoid `data`/`tmp`/`handle`.
+   - Clarity over cleverness: the obvious form; extract a name for a confusing
+     expression rather than explaining it in a comment; early returns and guards
+     over nesting.
+   - One level of abstraction per function, so the flow reads top to bottom.
+3. **One rhythm per kind of work.** The same kind of work (an endpoint, a screen, a
+   job, a form) moves data through the same stages, in the same order, with the same
+   names and the same error and loading shape, everywhere in the codebase. Someone
+   who has read one should be able to predict the next.
+   - Before writing, find the closest existing instance of this kind of work and
+     mirror its flow, not just its formatting.
+   - Mirroring the established flow is never speculative, even when this one
+     instance would get by without a stage. A shorter one-off is a second pattern,
+     and a second pattern is the defect.
+   - A better pattern is a migration, not a local improvement: propose moving every
+     instance (as its own change), or keep the existing rhythm.
+   - Review check: could a reader who knows the sibling predict this file's
+     structure?
+
 ## Code quality & style
 
 Match the code to its surroundings — the bar is "reads like the rest of this
-file/module," not your personal preference. Naming, comment density, error
-handling, and file layout all follow local idiom; don't introduce a style island.
+file/module," not your personal preference; for a kind of work, the codebase's rhythm
+(hard rule 3) is the surroundings. Naming, comment density, error handling, and file
+layout all follow local idiom; don't introduce a style island.
 
 - **Respect per-repo conventions over general taste.** A repo may, for example,
   ban comments entirely in some languages (extract a name instead), or keep
   framework decorators out of shared type libs. Read AGENTS.md, CLAUDE.md, and
   neighbouring code before imposing anything. (This install's standing conventions:
   `LOCAL.md` beside this skill, when your copy keeps one — *Per-repo conventions*.)
-- **DRY with judgment — three strikes before a shared helper.** Two things that
-  merely look alike today are not duplication.
-- **No speculative construction in new code:** no abstractions for single-use
-  code, no configurability or "flexibility" that wasn't requested, no error
-  handling for scenarios that cannot occur. The refactor guidance below covers
-  when structure earns its place; a first implementation defaults to none.
+- **DRY with judgment — three strikes before a shared helper.** Two pieces of logic
+  that merely look alike today are not duplication. This governs shared *logic*; the
+  shape of the flow is hard rule 3. One exception: two copies that must stay in
+  lockstep (the same fields, the same contract) share one base from the second use,
+  so they cannot drift.
+- **No speculative mechanism in new code:** no generic engines, configurability,
+  factories, registries or flag parameters for single-use code; no "flexibility"
+  that wasn't requested; no error handling for scenarios that cannot occur.
+  Mirroring the established flow is not speculation (hard rule 3).
 - **Clean up your own orphans — and only yours:** remove the imports, variables,
   and functions that YOUR change made unused. Pre-existing dead code stays in an
   unrelated diff — flag it for a separate pass under the deletion discipline
@@ -56,16 +100,16 @@ handling, and file layout all follow local idiom; don't introduce a style island
   changes behavior, surface it separately rather than smuggling it in.
 - **Change sizing:** ~100 changed lines is good, ~300 acceptable for one logical
   change, ~1000 split it — stacked, by file group, horizontal (shared code first),
-  or vertical slices. A ~1000-line *file* is itself an inspection signal. Whole-file
-  deletions and automated refactors are exempt; there the reviewer checks intent.
+  or vertical slices. Whole-file deletions and automated refactors are exempt;
+  there the reviewer checks intent.
 - **Rule of 500:** a refactor touching >500 lines warrants a codemod, not hand edits.
 
 ### When a refactor is worth it
 
 Propose the named move, not just the problem — and apply one test: **does this
 reduce complexity or merely relocate it?** Count the concepts a reader must hold,
-prefer the version where branches *disappear*, and prefer deleting an abstraction
-to polishing it. Making a type boundary explicit so downstream branching vanishes
+prefer the version where branches *disappear*, and prefer deleting a mechanism to
+polishing it. Making a type boundary explicit so downstream branching vanishes
 is usually the highest-value move available.
 
 **The over-simplification traps** (these are the non-obvious half, and why
@@ -75,180 +119,67 @@ is usually the highest-value move available.
 - Merging two simple functions into one complex one is not simpler.
 - Some abstractions exist for extensibility or testability — stripping them is a
   regression, not a cleanup. **Fewer lines ≠ simpler.**
-- Litmus: would a new team member understand this faster than the original?
+- Dropping a stage the rest of the codebase has (hard rule 3) is not a
+  simplification; it starts a second rhythm.
+- Litmus: would a junior engineer understand this faster than the original?
 
 **Don't simplify** code you don't yet understand, code that is already clean,
 performance-critical code where the simpler form is measurably slower, or a module
 about to be rewritten.
 
-## Dead code — the deletion discipline
+## Reviewing a diff
 
-"Dead code" = code that can never be reached or referenced through ANY path.
-Apparently-dead is not dead. Before deleting, you must actively rule out every
-non-obvious form of use below. **The default answer to "is this safe to delete?"
-is "prove it first."**
+Your own before commit, a delegated agent's, or a colleague's — the same pass.
 
-### Step 0 — establish a green baseline before touching anything
+- **Read the tests first** — they reveal intent and coverage before you read the
+  implementation. Agent-written tests are where defects hide: read them at least as
+  hard as the code. A loosened assertion (an exact value turned into
+  `toBeGreaterThanOrEqual`, `toBeDefined`) is a finding, and an `as` cast is a
+  contract change dodged. Settle a doubtful assertion by mutating the subject — see
+  [tdd-skill](../tdd-skill/SKILL.md)'s mutation rails.
+- **The hard rules, file by file:** one responsibility per file, the flow mirrors
+  its nearest sibling, a junior could follow it.
+- **"Additive" is a property of the diff, not of the behavior.** A new entry in a
+  shared map, registry or enum changes every rule keyed off it: grep every read and
+  enumerate the branches it feeds. A new field threaded through a payload: list
+  every early return between entry and write, and check every falsiness guard
+  (`x || undefined`, `if (x)`) still lets an empty value be saved. (A cross-skill
+  principles file, if you keep one: *Giving existing code a NEW INPUT is an
+  interface change*.)
+- **Before approving a new shared abstraction or contract change,** grep the
+  existing contract and its consumers for a flag or branch that already covers the
+  case — and read the type's own comments.
+- **A behavior change carries its prose.** Grep for docs, API descriptions and
+  comments describing the old behavior and update them in the same change.
+- **Error paths:** keep only the fallible call inside a `try` (a validation `throw`
+  inside it is caught by its own `catch`); normalise error payloads to one shape at
+  the boundary; a shared helper's fallback text stays generic; and no error path may
+  render nothing.
+- **Allow-lists over user input** use a `Map`/`Set` or `Object.hasOwn` — an object
+  literal inherits `constructor`, `toString` and `__proto__`.
+- **A green run proves only what it ran.** A test runner that transpiles without
+  type-checking is not a type-check; run the full suite, not the touched specs; read
+  a linter's file count, not just its error count (an unquoted `**` in a shell-run
+  script lints one directory level). (A cross-skill principles file, if you keep one:
+  *A green suite covers only the defect classes its environment can represent*.)
+- **A finding is a property of the code in front of you.** Cross-repo merge order
+  and release sequencing are not findings; how the code behaves when a dependency is
+  missing is.
 
-Run the relevant build / type-check / lint / tests FIRST and confirm they pass
-(or note what's already red). Without a known-good baseline you can't tell
-whether breakage came from your deletion or was pre-existing. Also rebuild any
-workspace lib you depend on — stale `dist/` produces phantom type errors and
-false "unused" signals (e.g. a shared types package `@acme/types` that resolves
-from `dist`; this install's real cases are under *Shared workspace lib examples* in
-`LOCAL.md` beside this skill, when your copy keeps one).
+## Dead code: prove it first
 
-### Step 1 — search exhaustively, across the whole stack
+Removing code is governed by [dead-code.md](dead-code.md) — read it before deleting
+anything your own change didn't orphan, and whenever asked to "remove dead code". The
+short form:
 
-A single-package grep is not enough in a monorepo. For each symbol:
-
-- **Calibrate your detector first:** run the search/loop against a symbol you KNOW
-  is used and confirm it reports references — a silently-broken search (e.g. zsh
-  globbing `grep --include='*.ts'` into an error) makes *everything* look dead.
-- Grep the **entire workspace**, not just the current package — shared libs
-  (e.g. `@acme/types`) are consumed by other apps, frontends, and services.
-- Search for the **bare name** AND for **string forms** of it (quoted, in arrays,
-  in config). Dynamic dispatch hides references in strings.
-- Search **other repos** that depend on this one when the symbol is exported
-  from a published/shared package. An export with no in-repo use may still be
-  another repo's public API.
-- Check **tests, fixtures, mocks, seeds, migrations, config files, and non-code
-  references** (HTML/template ids & classes, `data-*` attributes, i18n keys, SQL,
-  CSS selectors) — not just `src/`.
-- **Read the hits; don't trust counts.** Common identifiers (`Service`, `User`,
-  `index`) produce substring false positives both ways — a high grep count can be
-  noise, and a *type* can be reached transitively through another type with zero
-  direct hits. Open the file and confirm the actual reference.
-- **Distinguish a real reference from a mention.** A name appearing in a comment,
-  a doc-string, a changelog, or a disabled/commented block is not a live call.
-  Conversely, don't assume a commented block is dead (see intentional stubs below).
-
-### Step 2 — rule out non-obvious "use"
-
-Code is NOT dead if it is reached by any of these. Each is a way a symbol looks
-unreferenced to a naive grep but is live at runtime:
-
-- **Public/library API:** exported from a package others import. Unused *inside*
-  the repo ≠ unused. Check `package.go`/`index.ts` barrels and the package's
-  consumers before touching exports.
-- **Dynamic / string-based references:** `import()`, `require(name)`,
-  computed property access `obj[methodName]`, route tables, event names, DI
-  tokens, job/queue names, GraphQL resolver maps, template strings.
-- **Reflection & metaprogramming:** Go reflection + **struct tags**
-  (`json:`/`db:`/`validate:` — the field is "unused" in Go but drives
-  serialization); Rails metaprogramming (`send`, `method_missing`,
-  `define_method`, `constantize`, callbacks, STI); decorators/annotations that
-  register via reflection (NestJS providers, EntitySchema, DI).
-- **Convention-based wiring:** framework auto-registration by file location or
-  name (controllers, migrations, Rails autoload, Vue auto-imported components,
-  Nest module scanning). The "caller" is the framework, not your code. Watch for
-  routes/endpoints registered under **dotted/string names via mixins** (e.g. Rails
-  Grape IPC routes registered through `self.included(base)` — no literal call
-  site exists) and **runtime route registration** (routers that mount only routes
-  matching a `meta`/auth predicate, so the route def looks statically unreferenced).
-- **Intentional stubs & rebuild markers:** an empty component, a commented-out
-  block with a "add back when we rebuild X" TODO, or a deliberately-omitted module
-  registration may be a placeholder, not litter. Confirm intent (git log, the
-  TODO, the user) before removing — deleting it loses the breadcrumb.
-- **Pattern/contract-based config:** schemas that accept anything matching a
-  pattern (e.g. a Joi rule that allows any `*_API_URL` env var) mean a value can be
-  consumed without ever being named in code. "Undeclared" ≠ unused.
-- **Serialization & external contracts:** fields read from / written to JSON,
-  DB columns, API payloads, env vars, feature flags, CLI args. Removing a field
-  that "nothing reads" can break a wire format or a stored record.
-- **Build-conditional code:** Go build tags, `NODE_ENV`/env-gated branches,
-  platform-specific files, feature-flag-gated paths. Off in your config ≠ dead.
-- **Framework lifecycle hooks:** callbacks/handlers invoked by the framework
-  (`after_commit`, lifecycle methods, signal handlers, scheduled jobs).
-- **Tests-only but intentional:** test helpers, factories, fixtures. Used only
-  by tests is still used.
-
-### Step 3 — lean on tooling, then verify
-
-Tools find candidates; they do not authorize deletion.
-
-- Use the language's own unused-code detectors as a *first pass*: TS
-  `noUnusedLocals`/`tsc`, ESLint/oxlint `no-unused-vars`, `ts-prune`/`knip` for
-  exports, `staticcheck`/`go vet`/`deadcode` for Go, Ruby `debride`/coverage for
-  Rails. For languages with no good detector (e.g. R/Shiny), the first pass is a
-  disciplined project-wide grep instead.
-- **Configure the tool's real entry points before trusting it.** Detectors infer
-  reachability from declared entrypoints; a non-obvious one (a TS module loaded by
-  a plain `server.js`, a CLI script, a dynamically-imported route) makes everything
-  it pulls in look "unused." Most knip/ts-prune false positives trace to this.
-- Treat their output as **candidates**, then apply Steps 1–2 to each. These
-  tools routinely miss reflection, string dispatch, cross-repo use, and
-  framework wiring — and over-report behind bad entrypoints.
-- **Peel orphans iteratively, not in one shot.** A deletion orphans whatever the
-  deleted code referenced (DTOs → sub-DTOs → validators). Re-run detection after
-  each deletion pass and repeat until a pass finds nothing new; keep any file
-  that retains a single non-spec, non-self reference.
-- After deleting, **build + run the test suite + boot the affected path**. A
-  green compile is necessary, not sufficient — exercise the code path (or a
-  live stack) when the use could be dynamic. Report what you verified.
-- **Don't infer "dead/broken" from stale data.** An empty table or zero-result
-  query in a dev snapshot can be old data, not a dead code path — reproduce live
-  before concluding the code is unused.
-
-### Prefer the smallest safe reduction
-
-Removing the whole symbol is the last resort, not the first. Scale the cut to what
-you can actually prove is unreachable:
-
-- An **unused export** that's still used internally → drop the `export` keyword,
-  keep the symbol.
-- A **dead barrel re-export** where the underlying thing is imported directly →
-  remove the re-export line, keep the component/module.
-- Only delete the entire definition when nothing anywhere — in any repo, by any
-  mechanism above — reaches it.
-
-### Step 4 — when uncertain, don't delete
-
-If you cannot prove a symbol is dead, **leave it and report it** as a candidate
-with what you found (where you looked, why it's ambiguous), rather than removing
-it. Group confirmed-dead deletions into their own atomic commit, separate from
-quality refactors, so they're easy to review and revert.
-
-### Consumer-bounded removal (when the user names the complete consumer set)
-
-The reason removing an exported/public symbol (an API endpoint, a library export)
-is normally unsafe is a *single* unknown: **we don't know everyone who calls it.**
-So a published endpoint with no in-repo use is still presumed live (Step 2). When
-the **user explicitly tells you the complete, authoritative set of consumers**,
-that unknown is gone — and only then may you treat cross-consumer absence as proof
-of death. Use this mode ONLY on the user's explicit instruction; never assume a
-consumer set yourself.
-
-When instructed, treat the named consumers as ground truth:
-
-- **Make the consumer set explicit in your report** ("user states the only consumer
-  of `orders-api` is `web-app`"). The whole removal rests on this claim — surface it
-  so the user can correct it before anything is deleted.
-- **Search every named consumer exhaustively** for the endpoint/symbol, applying
-  Step 1 (bare name + string forms: URL paths, route constants, service-method
-  names, generated clients) and Step 2 (dynamic/string dispatch, config). The path
-  may be assembled (`base + '/v1/' + resource`), so grep for path fragments, not
-  just whole strings.
-- **An endpoint absent from all named consumers is confirmed dead** — remove it,
-  even though it's "public." Present in any consumer → live; keep it.
-- **Re-confirm the boundary still holds** before deleting: verify no *other*
-  in-repo or sibling app has quietly started consuming it (a new service, a cron, a
-  test harness). The user's claim covers known consumers; a quick workspace grep
-  guards against a new one. If you find a consumer the user didn't name, stop and
-  report — the boundary was wrong.
-- **Migration ordering matters.** When old endpoints are being superseded by new
-  ones (e.g. `v1` → `v2`), only remove the old endpoint after its consumer has been
-  cut over to the replacement *and* that cutover is merged/verified — otherwise you
-  delete something still live in the current consumer revision. Sequence:
-  add new → migrate consumer → confirm no consumer references old → remove old.
-
-Worked example (hypothetical): the user states **the only consumer of a service
-`orders-api` is `web-app`.** Once an old orders-api list endpoint has been replaced
-by a new versioned one and web-app is moved onto the new version, diff orders-api's
-exposed endpoints against web-app's usage to identify the now-orphaned old
-endpoints, and remove them as confirmed-dead. (This install's standing consumer
-set, stated by the user: `LOCAL.md` beside this skill, when your copy keeps one —
-*Standing consumer set*.)
+- "Dead" means unreachable through ANY path. Rule out public API, string dispatch,
+  reflection, framework wiring, serialization, build flags, lifecycle hooks,
+  deliberate stubs and test-only use before calling anything dead.
+- Tools give candidates, never verdicts; calibrate your search on a symbol you know
+  is used.
+- Prefer the smallest cut (drop the `export` before the symbol); when you can't
+  prove it, flag it — don't delete it.
+- Deletions get their own commit, with the evidence attached.
 
 ## Verify a flagged issue before acting on it
 
@@ -268,6 +199,8 @@ reviewers over-report; acting blindly churns or breaks correct code.
   them — surface it as a decision, don't smuggle it into a cleanup.
 - **Scope the fix to the real defect.** Reading the exact code often shrinks a fix from a wide
   signature change to a one-line clamp (and sometimes proves there's nothing to fix).
+- **Budget for a third of your first-pass findings to be wrong.** For each candidate, name the
+  one file read or command that would disprove it, and run it before writing the finding down.
 - Then stack the **verified** fixes as small, concern-scoped commits/PRs.
 
 ## Fix at the right layer, at the right scope
@@ -292,27 +225,20 @@ reviewers over-report; acting blindly churns or breaks correct code.
   into near-duplicates; and **don't make one function serve two registers** — a label
   helper stretched to cover two audiences reads wrong in both.
 
-> **Reviewing a delegate's diff:** a code-writing agent **reaches for the weakest passing
-> assertion**, and arguing about it is slower than settling it empirically — mutate the
-> subject and see whether the assertion actually catches it. See [tdd-skill](../tdd-skill/SKILL.md)'s mutation
-> rails; the standard here is that the returned diff meets the same bar as your own.
-
 ## Reporting review findings
 
 - **Label every finding by severity:** **Critical** (blocks — security, data
-  loss, broken functionality) / *(no prefix)* = Required / **Optional/Consider**
-  (worth doing, not required) / **Nit** (author may ignore) / **FYI**. Without
-  labels authors treat all feedback as mandatory.
-- **Lead by leverage:** correctness & security first, then structural
-  regressions and missed simplifications, then the rest. A few high-conviction
-  comments beat a long list — if you have one structural problem and ten nits,
-  the structural problem IS the review.
+  loss, broken functionality) / *(no prefix)* = Required — including any break of
+  a hard rule / **Optional/Consider** (worth doing, not required) / **Nit** (author
+  may ignore) / **FYI**. Without labels authors treat all feedback as mandatory.
+- **Lead by leverage:** correctness & security first, then hard-rule breaks and
+  structural regressions, then missed simplifications, then the rest. A few
+  high-conviction comments beat a long list — if you have one structural problem and
+  ten nits, the structural problem IS the review.
 - **Approve when the change definitely improves overall code health**, even if
   imperfect; don't block because it isn't how you'd have written it. Exit: all
   Critical resolved; every Required resolved or explicitly deferred with a filed
   follow-up (per the open-followups habit — no deferred cleanup without one).
-- **Review the tests first** — they reveal intent and coverage before you read
-  the implementation.
 
 ## Posting a review to a PR on the user's behalf
 
@@ -361,16 +287,9 @@ originating PR*.)
 - **Pre-add gate:** does the existing stack already solve it / size / maintenance
   / audit / license.
 
-## Output when asked to "remove dead code"
-
-1. List candidates found (tooling + manual search).
-2. For each: verdict — **confirmed dead** (with the search evidence) /
-   **live** (with the use you found) / **uncertain** (flag, don't delete).
-3. Delete only the confirmed set; keep it in a dedicated commit.
-4. State what you ran to verify (build, tests, live boot) and what's unverified.
-
 ## Before you call this done
 
+- Every changed file meets the three hard rules, or the exception is stated.
 - Every deletion has evidence attached (where you searched, what you ruled out) —
   not just a tool's say-so.
 - Anything you couldn't prove dead is flagged, not deleted.
@@ -385,6 +304,8 @@ originating PR*.)
 
 - [deprecation-and-migration](../deprecation-and-migration/SKILL.md): removing something that still has consumers is a migration, not a cleanup.
 - [security-and-hardening](../security-and-hardening/SKILL.md): its dependency-intake checklist runs alongside the pre-add gate here.
+- [tdd-skill](../tdd-skill/SKILL.md): mutation rails for settling whether a test's assertion actually catches anything.
+- [frontend](../frontend/SKILL.md): how a screen's components, state and data access are structured — the layers hard rule 1 splits along.
 
 ## Capturing learnings (session-handoff protocol)
 

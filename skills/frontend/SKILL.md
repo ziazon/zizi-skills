@@ -35,6 +35,7 @@ wrong-or-no file is how established conventions get reinvented badly:
 | Field placement, permissions/edit surfaces, modal-vs-page, icons, maps, taste | The project's UI/UX reference — includes the light+dark verification rule |
 | Performance / Lighthouse / SEO scores | [web-performance.md](web-performance.md) — `scripts/lh-audit.sh` + the ordered remediation playbook |
 | A stack other than the primary Vue 3 + Tabler one (e.g. R/Shiny) | [other-stacks.md](other-stacks.md) |
+| User-facing text in a multi-language app — new strings, translation keys, locale formatting, RTL | [i18n](../i18n/SKILL.md) — the completeness gate and the surface inventory |
 
 Keep one project reference file per topic beside this skill, named for the project and
 topic, and route to it from this table. This install's project files are listed in
@@ -158,6 +159,7 @@ Each of these ships a green build and a plausible-looking screenshot.
 ## Related skills
 
 - [plain-language](../plain-language/SKILL.md): the words inside empty, loading and error states, and every other UI label.
+- [code-quality](../code-quality/SKILL.md): the hard rules every component is held to — one responsibility per file (a single-file component's three blocks are the only exception, with its logic in composables), readable by a junior engineer, and one rhythm per kind of screen.
 
 ## Capturing learnings
 

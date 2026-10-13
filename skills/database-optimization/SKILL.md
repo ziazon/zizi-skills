@@ -218,6 +218,7 @@ Read the matching file before working in its area:
 - [tdd-skill](../tdd-skill/SKILL.md): mocked green is necessary, not sufficient; a DB-touching change gets a real-database run.
 - [deprecation-and-migration](../deprecation-and-migration/SKILL.md): shared-table expand/contract changes, where old and new code hit the DB at once.
 - [data-analytics](../data-analytics/SKILL.md): the metrics and dashboards whose queries this skill makes fast.
+- [code-quality](../code-quality/SKILL.md): the hard rules every query, entity and migration diff meets — one responsibility per file, readable by a junior engineer, and one rhythm per kind of work.
 
 ## Capturing learnings (session-handoff protocol)
 
