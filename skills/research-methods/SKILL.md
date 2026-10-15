@@ -1,20 +1,10 @@
 ---
 name: research-methods
 description: >
-  Design and execute social/health research and apply the right methodology — conceptual
-  & logic modeling, community-based participatory research (CBPR/YPAR), participatory and
-  agent-based modeling, composite-index spatial analysis, implementation-science
-  frameworks, measures/instrument design, and human-subjects protections (IRB/HRPP).
-  Invoke whenever planning a study, building or expanding a conceptual model, choosing
-  methods or an implementation framework (e.g. CFIR vs RE-AIM, Bowen feasibility),
-  writing a human-subjects/IRB section, doing a literature synthesis, or reviewing
-  research-ethics/HRPP/AAHRPP documents — e.g. "design this study", "expand the model",
-  "which framework fits", "write the IRB section". Grounds recommendations in the
-  researcher's own domains, populations, and collaborators when a local researcher
-  profile is kept. Disambiguation: this skill owns study-design SUBSTANCE (methods,
-  frameworks, ethics); for proposal structure and funder alignment use grant-writing;
-  for scholarly wording and voice pair with a scholarly-voice/academic-writing skill if
-  you keep one; for non-technical/business audiences use plain-language.
+  Social and health research design: conceptual and logic models, CBPR/YPAR, participatory and
+  agent-based modeling, spatial indices, implementation frameworks (CFIR, RE-AIM), measures, IRB
+  and human-subjects sections, literature synthesis. Use when planning a study or choosing a
+  method or framework. Proposal structure is grant-writing; wording is academic-writing.
 ---
 
 # Research methods — design, modeling, ethics, and domain context

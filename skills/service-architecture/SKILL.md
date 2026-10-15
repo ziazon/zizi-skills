@@ -1,16 +1,10 @@
 ---
 name: service-architecture
 description: >
-  Use when making or reviewing backend service-architecture decisions — service
-  boundaries, consolidation vs. splitting, inter-service communication (IPC/direct/
-  queue), auth/authorization patterns across services, where logic should live, and
-  legacy-migration (strangler) strategy. Invoke whenever you: add or version an
-  endpoint/controller/module, touch auth guards or tiers, decide "which service should
-  own this", migrate logic off a legacy service, or review a backend design. Load it
-  BEFORE adding a new endpoint or service-to-service call, or deciding which service
-  owns something. Do NOT use for query/index/view performance — that's
-  database-optimization; do NOT use for deploy/CI or dev tooling — that's
-  infrastructure; do NOT use for how to run/build a project — that's project-config.
+  Backend architecture decisions: service boundaries, splitting vs consolidating, inter-service
+  calls, auth guards and tiers, where logic lives, strangler migrations. Load before adding or
+  versioning an endpoint or a service-to-service call, or deciding which service owns something.
+  Query performance is database-optimization.
 ---
 
 # Service Architecture

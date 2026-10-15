@@ -1,14 +1,9 @@
 ---
 name: orchestration
 description: >
-  Use whenever a task is multi-step, multi-phase, or long-running — a program
-  phase, a migration, a broad audit/sweep, deep research, or any job that means
-  reading or editing many files. Run it as an ORCHESTRATOR delegating to
-  disposable sub-agent contexts (Claude Code: the Agent tool) instead of doing
-  everything inline. Invoke at task start, when you notice your context filling
-  with exploration, or when work can be split across disjoint files. Do NOT use
-  for trivial single-step edits, quick questions, or conversational turns — the
-  agent overhead isn't worth it there.
+  Run multi-step or long-running work as an orchestrator over disposable sub-agents. Use at the
+  start of a program phase, migration, broad sweep, deep research or many-file job, or when your
+  context fills with exploration. Not for single-step edits or quick questions.
 ---
 
 # Orchestration over sub-agents

@@ -1,17 +1,11 @@
 ---
 name: integrations
 description: >
-  Use when connecting to or automating a third-party service/SaaS — its REST API,
-  an MCP server, OAuth/token auth, webhooks, or a recurring sync (usage/billing/
-  expense trackers, data pushes, scheduled updates). Invoke whenever you: build or
-  debug an integration, wire a daily/automated job against an external service,
-  choose where automation should run (local hook vs cloud vs in-session MCP), make
-  external writes idempotent, or scope/research a vendor API before integrating.
-  Carries hard-won gotchas (auth-path reality checks, idempotent upserts, secret
-  handling) and accumulates per-service quirks. Do NOT use for internal
-  service-to-service calls (IPC, guards, endpoint design) — that's
-  service-architecture; do NOT use for CI/deploy/launchd plumbing itself — that's
-  infrastructure (this skill owns the external-service side of an automation).
+  Connect to or automate third-party services: REST APIs, MCP servers, OAuth and tokens,
+  webhooks, recurring syncs. Use when building or debugging an integration, scheduling a job
+  against an external service, deciding where automation runs, making external writes
+  idempotent, or researching a vendor API. Internal service-to-service calls are
+  service-architecture.
 ---
 
 # Integrations & Automations

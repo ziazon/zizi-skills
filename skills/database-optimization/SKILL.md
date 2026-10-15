@@ -1,14 +1,10 @@
 ---
 name: database-optimization
 description: >
-  Use when writing or reviewing database queries, views, indexes, or schema for
-  correctness and performance. Invoke whenever you: add or change ANY query (ORM or
-  raw), touch an EntitySchema/entity/migration, design an index, build or tune a
-  (materialized) view or read model, or investigate "this endpoint/list is slow".
-  In a TypeORM project, load this before writing ORM code — it carries live-verified
-  gotchas unit tests do not catch. Do NOT use for deciding which service owns a table
-  or where logic lives — that's service-architecture; do NOT use for how to run/migrate
-  a project locally — that's project-config.
+  Correct, fast queries, views, indexes and schema. Use before adding or changing any query (ORM
+  or raw), entity, migration, index or view, and when an endpoint or list is slow. In a TypeORM
+  project, load it before writing ORM code. Which service owns a table is service-architecture;
+  running migrations locally is project-config.
 ---
 
 # Database Optimization

@@ -1,19 +1,11 @@
 ---
 name: i18n
 description: >
-  Use when planning, building, reviewing or verifying multi-language support
-  (i18n / l10n, translations, locales) in any app: adding a language or a
-  translation key, extracting hard-coded strings, wiring vue-i18n, nestjs-i18n,
-  go-i18n or similar, changing source-language copy, locale formatting (dates,
-  numbers, currency, plurals, ICU), translating data-driven content (enum
-  labels, categories, emails, PDFs, exports), Accept-Language and locale
-  routing, hreflang, RTL, pseudo-locales, or the language switcher's behaviour.
-  Invoke whenever a task touches a translation file or a user-facing string in a
-  product that ships in more than one language. Its core failure is a key that
-  reaches one pack and not the others. Not for visual judgement (design-guide),
-  loading Tabler's RTL stylesheets (tabler-ui), component structure (frontend) or which
-  content belongs on a page (information-architecture). This skill owns what
-  must be translated, how the pipeline stays complete, and how to prove it.
+  Multi-language support (i18n/l10n). Use when a task touches a translation file or a
+  user-facing string in a product that ships more than one language: adding a language or key,
+  extracting strings, vue-i18n/nestjs-i18n/go-i18n, locale formatting, translated data (enums,
+  emails, PDFs), locale routing, hreflang, RTL. Its core failure is a key that reaches one pack
+  and not the others.
 ---
 
 # Multi-language builds (i18n)

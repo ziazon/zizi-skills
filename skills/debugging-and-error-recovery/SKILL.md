@@ -1,6 +1,9 @@
 ---
 name: debugging-and-error-recovery
-description: Guides systematic root-cause debugging. Use when tests fail, builds break, behavior doesn't match expectations, or you encounter any unexpected error. Use when you need a systematic approach to finding and fixing the root cause rather than guessing.
+description: >
+  Root-cause debugging. Use when a test fails, a build breaks, behavior doesn't match
+  expectations, or any unexpected error appears. Builds a loop that goes red on the failure
+  before theorising, ranks falsifiable hypotheses, and ends with a regression test.
 ---
 
 # Debugging and Error Recovery
@@ -92,6 +95,11 @@ symptom* and *whether the input ever arrived*. Both of these have cost whole ses
   "I already ruled that out" was true against the *old* evidence; the new evidence is
   exactly what invalidates the earlier dismissal. Re-test it rather than reusing the
   verdict.
+- **Rank 3–5 falsifiable hypotheses before probing any of them.** Write each as a
+  prediction — "if X is the cause, then changing Y makes the bug disappear" — most
+  likely first, and change one variable per probe. A hypothesis with no prediction
+  cannot be ruled out, so it never leaves the list; a single hypothesis anchors you
+  on it.
 - **Prefer non-mutating observation first — the probe can BE the fix.** A read-only look
   at real state frequently resolves the question outright, and never leaves you unable to
   tell your own change from the original behavior.
@@ -105,17 +113,31 @@ symptom* and *whether the input ever arrived*. Both of these have cost whole ses
 
 Once the sections above have not explained it, work the loop in order.
 
-1. **Reproduce.** Make it happen reliably; without that you cannot tell a fix
-   from a coincidence. If it won't reproduce, classify it before chasing it —
-   timing-dependent (widen the window with delays or load), environment-dependent
-   (diff versions, env, and *data* — empty vs populated), or state-dependent (run
-   it in isolation vs after other operations, and look for shared caches and
-   singletons). "Truly random" is usually one of those three not yet found.
+1. **Build a red loop.** The step is done when ONE command, which you have run and
+   watched, goes red on the user's *exact* symptom — not a nearby failure. No red
+   loop, no hypotheses: theorising first is the failure this checklist exists to
+   prevent. Make the loop *tight* — seconds, deterministic, runnable unattended —
+   because its speed caps how fast every later step goes. Pick the cheapest shape
+   that reaches the bug: a failing test, a `curl` against the running service, a CLI
+   invocation diffed against expected output, a headless-browser script, a replayed
+   request or trace, a throwaway harness around one function, a fuzz loop, a bisect
+   script, or a differential run (old build vs new on the same input). A flake's goal
+   is a higher reproduction rate, not a single repro: run the trigger 100× in a loop
+   or in parallel, add load, or narrow the timing window with injected sleeps.
+   Classify a non-reproducing bug before chasing it — timing-dependent,
+   environment-dependent (diff versions, env, and *data* — empty vs populated), or
+   state-dependent (isolation vs after other operations; shared caches and
+   singletons). "Truly random" is usually one of those three not yet found. If no
+   loop can be built from here, stop and ask for what is missing — access, an
+   artifact (a log, a HAR, a dump), or permission to run something — rather than
+   debugging blind.
 2. **Localize.** Name the layer that owns the symptom before opening anything —
    see *Scope the symptom* above. For a regression, `git bisect run <test-cmd>`
    answers "which commit" faster than reading will.
-3. **Reduce.** Strip to the minimal failing case. A minimal reproduction is what
-   makes the root cause obvious instead of arguable.
+3. **Reduce.** Strip to the minimal failing case: remove one element at a time
+   (an input field, a config line, a step, a dependency), re-run the loop, and keep
+   the cut only if it stays red. Done when every remaining element is load-bearing.
+   A minimal reproduction is what makes the root cause obvious instead of arguable.
 4. **Write the failing regression test FIRST and watch it fail** — red before
    green, for the bug's *exact* symptom. Mechanics and the proof that the test is
    load-bearing live in [tdd-skill](../tdd-skill/SKILL.md); do not re-derive them here.
@@ -136,6 +158,14 @@ intermittent, or when several components interact. Remove it once the bug is
 fixed and a test guards it — and always remove anything carrying sensitive data.
 Error reporting, API error logging with request context, and key-flow metrics are
 permanent and stay.
+
+**Tag every temporary probe** with one session-unique prefix (`[DEBUG-a4f2]`) so the
+cleanup is a single grep, not a hunt. When Codex adds the probes, the brief names the
+tag, and the review greps the returned diff for it before anything lands.
+
+**Performance regressions take numbers, not logs.** Measure a baseline on the
+known-good revision with the same input, then bisect against that number; a log line
+tells you where time *seemed* to go, a measurement tells you where it went.
 
 ## Common Rationalizations
 
@@ -166,8 +196,15 @@ After fixing a bug:
 - [ ] All existing tests pass
 - [ ] Build succeeds
 - [ ] The original bug scenario is verified end-to-end
+- [ ] `grep` for the debug tag comes back empty, and throwaway harnesses are deleted
+- [ ] The commit or PR message states the confirmed cause, not just the change
+- [ ] If no honest seam exists for the regression test (the only reachable one is too
+      shallow to fail on this bug), that is recorded as a finding — a test that cannot
+      go red on the bug gives false confidence
 
 ## Related skills
 
 - [source-driven-development](../source-driven-development/SKILL.md): verify library behavior against the installed source and docs, never from memory.
 - [code-quality](../code-quality/SKILL.md): a fix is a diff like any other — the hard rules apply, and *Reviewing a diff* says how error paths are written.
+
+<!-- Red-loop gate, loop menu, ranked hypotheses, debug tags and the no-seam finding are adapted from mattpocock/skills `diagnosing-bugs` (MIT, (c) 2026 Matt Pocock). -->

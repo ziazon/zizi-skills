@@ -1,14 +1,10 @@
 ---
 name: tdd-skill
 description: >
-  Test-first (red-green-refactor) workflow for any codebase. Invoke whenever
-  adding or changing behavior, fixing a bug (the fix starts with a failing
-  regression test), or when asked to "add tests", "write a test for this",
-  "cover this", or "do this with TDD". Codebase-agnostic: it tells you to first
-  discover how THIS project runs tests, then apply the loop, and to verify
-  against a live stack when a unit test can't reach the behavior. Do NOT use it
-  merely to run/observe an existing change in the app — that's the /verify
-  command; this skill is the discipline for driving code WITH tests.
+  Test-first (red-green-refactor) for any codebase. Use when adding or changing behavior, fixing
+  a bug (it starts with a failing regression test), or asked to add or cover tests. Finds how
+  this project runs tests, names the seams under test, and verifies on a live stack when a unit
+  test can't reach the behavior. Watching an existing change run is /verify.
 ---
 
 # TDD Skill
@@ -151,6 +147,11 @@ separation is what makes a genuine red possible — and it adds failure modes a 
 loop doesn't have. (This install's split: `LOCAL.md` beside this skill, when your copy
 keeps one — section *Who writes the code*.)
 
+- **Name the seams before the specs.** The brief lists every seam the specs may test
+  at — a public interface, route or command, never a private helper — with one line
+  each on what a test there catches and what it misses. Prefer one existing, high
+  seam over several new low ones; a spec at a seam the brief did not list is a
+  review finding. Settle the list at the planning gate, not mid-run.
 - **Two dispatches, never one.** An agent that writes the implementation and its
   tests in one dispatch never observes a failure. *Dispatch A:* "write ONLY
   `Foo.spec.ts`; do **NOT** create `Foo.vue`; do NOT modify any other file. The spec
@@ -241,7 +242,7 @@ so both sides of our code agree with each other while disagreeing with reality.
 
 ## Use the project's own conventions
 
-Match the neighbouring tests — fixtures, factories, and mocking style. Two
+Match the neighbouring tests — fixtures, factories, and mocking style. Four
 preferences that are *not* the default instinct:
 
 - **Construct the unit directly with hand-rolled mocks rather than booting the
@@ -249,6 +250,19 @@ preferences that are *not* the default instinct:
   instead of at the container.
 - **Mock only the true boundary** (network, clock, external services). Over-mock
   the thing under test and the test only proves your mocks agree with themselves.
+  Make the boundary easy to fake: inject it, and wrap each external operation in its
+  own function (`getInvoice(id)`, not a generic `fetch(path)`), so a mock is a fixed
+  return value with no branching on its arguments.
+- **Expected values come from outside the code under test.** An assertion that
+  recomputes the answer the way the implementation does is a tautology: it passes for
+  every bug the two share. Use a literal, a spec example, or a hand-worked case —
+  `expect(total(cart)).toBe(42.50)`, never
+  `expect(total(cart)).toBe(cart.items.reduce((s, i) => s + i.price, 0))`.
+- **Verify through the public interface.** Assert on what a caller can observe — the
+  return value, the response, the rendered output — not on private methods, call
+  counts or call order of internal collaborators, or a side-channel DB query the
+  interface itself would answer. A test pinned to internals breaks on every refactor
+  and passes through real regressions.
 
 ## Test the wiring, not just the logic
 
@@ -371,3 +385,5 @@ work: scan the session for durable testing knowledge (how THIS stack runs/locate
 mocking patterns that worked, framework gotchas, useful adversarial cases), distill into
 concise rules, and append to LEARNINGS.md — dedupe/merge, tag stack-specific items, and
 read it at the start of testing work in a matching stack.
+
+<!-- Seam naming, the tautology rule's example, and the interface-not-internals and per-operation-wrapper rules are adapted from mattpocock/skills `tdd` (MIT, (c) 2026 Matt Pocock). -->

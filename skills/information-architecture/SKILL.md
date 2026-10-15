@@ -1,22 +1,11 @@
 ---
 name: information-architecture
 description: >
-  Use when deciding how content and pages are ORGANIZED so the right message
-  reaches the right audience — site maps and page inventories, what each page's
-  job is, where a message/section/feature should live, navigation and funnel
-  structure, heading-level scannability, and audits for buried or orphaned key
-  messages. Applies to any structured content, not only websites: docs, books,
-  curricula and long papers are the same discipline. Invoke on questions like
-  "where should this content live", "does the home page need X", "users can't
-  find Y", when defining an audience or a thesis, when outlining before
-  writing, when adding/removing/reordering a page or section, and as a required
-  lens on any content-page review. Scope is STRUCTURE and placement of content
-  ONLY — visual/aesthetic judgment is design-guide; component/state/data
-  structure is frontend; broad UI polish is impeccable; sentence-level voice and
-  wording are academic-writing (scholarly) or plain-language (non-technical);
-  and grant proposals take their structure from grant-writing, which owns
-  funder-mandated section order. Those often co-apply; this skill decides what
-  goes where and why.
+  How content and pages are organized for their audience: site maps, page inventories, each
+  page's job, where a message or feature lives, navigation and funnels, heading structure,
+  buried or orphaned messages. Applies to docs, books, curricula and papers too. Use when
+  outlining, when adding or reordering pages or sections, and on any content-page review. Looks
+  are design-guide; wording is plain-language or academic-writing.
 ---
 
 # Information Architecture

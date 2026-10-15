@@ -1,16 +1,10 @@
 ---
 name: infrastructure
 description: >
-  Use when working on infrastructure or developer-workflow tooling — Nomad, Consul,
-  Vault, Terraform, Docker, CI/CD (GitHub Actions), and the CLI/scripts that run a
-  codebase (monorepo task runners, env management, setup/dev scripts, a project's own
-  ops/deploy CLI, launchd/hooks tooling). Invoke whenever you: edit any file under
-  infrastructure/ or a job-spec directory, touch a Dockerfile/workflow/Makefile, debug
-  env or direnv/worktree setup, publish workspace libs, or improve the dev lifecycle.
-  Do NOT use to merely LOOK UP how to run/build/test a project — that's project-config
-  (this skill is for changing/building the tooling, not consulting it); do NOT use for
-  third-party SaaS APIs/webhooks/MCP automations — that's integrations; do NOT use
-  for app-level logging — that's monitoring.
+  Change infrastructure and dev-workflow tooling: Nomad, Consul, Vault, Terraform, Docker,
+  GitHub Actions, task runners, env and direnv setup, setup scripts, a project's own ops CLI,
+  launchd and hooks. Use when editing any of these or debugging env or worktree setup. Looking
+  up how to run a project is project-config; third-party APIs are integrations.
 ---
 
 # Infrastructure & Dev Workflow

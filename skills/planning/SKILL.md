@@ -1,13 +1,10 @@
 ---
 name: planning
 description: >
-  Use BEFORE building anything non-trivial: multi-phase or multi-file work, a new
-  feature, a migration, anything estimated beyond a quick edit — or whenever the
-  user asks for a plan or says "let's plan this". Drives the required workflow:
-  research → written plan → ALL questions asked upfront in one batch → user
-  approval → autonomous execution. Do not use for trivial single-step changes
-  (just do those), and do not start writing implementation code while this skill's
-  approval gate is still open.
+  Plan before building anything non-trivial: multi-file or multi-phase work, a feature, a
+  migration, or whenever asked to plan. Research, write the plan, ask every decision up front (a
+  second gate only for questions that depend on a first-gate answer), get approval, then execute
+  autonomously. No implementation while the approval gate is open.
 ---
 
 # Planning & Execution Workflow
@@ -52,6 +49,17 @@ touch and the order you'll touch them in, keep researching.
   around data that turns out to be empty, stale, or an artifact changes the whole plan.
 - **A per-person decision propagates: check whether the NEXT question inherits its
   shape** before asking it as if it were independent.
+- **Hold the request's words against the project's glossary.** When the user's term is
+  looser than the glossary's, or means something else there ("cancel" where the code
+  cancels whole orders and the user means one line), that mismatch is a question for
+  the batch. When a term resolves, write its glossary line the same turn — the domain
+  skill names where that glossary lives — not at handoff.
+- **Design a new module or interface twice.** Brief two or three sub-agents in
+  parallel, each under a different constraint (the smallest interface, the most
+  flexible one, the one tuned for the common caller), then compare the sketches on
+  how much each hides and how many callers each serves. The first shape that comes to
+  mind is rarely the deepest one; see [code-quality](../code-quality/SKILL.md)
+  *Module design*.
 
 ### 2. Write the plan down — a committed file, not a chat message
 
@@ -62,10 +70,21 @@ lives in chat can't be resumed, reviewed, or audited. Include:
 
 - **Phases/steps** in execution order, each with its own verification step
   ("how we'll know this phase worked"). Per step, capture: acceptance criteria,
-  a **named** verification command, files-likely-touched, and dependency links.
+  a **named** verification command, files-likely-touched, the **test seams** it will
+  be proven at (prefer one existing high seam — [tdd-skill](../tdd-skill/SKILL.md)),
+  and a **`Blocked by:`** line naming the step ids it waits on. The steps whose
+  blockers are all done are the *frontier*: those, and only those, may run in
+  parallel.
 - **Files to touch** per phase (this also enables sub-agent partitioning — see
   the orchestration skill).
-- **Decision log**: each decision with the chosen option and why.
+- **Decision log**: each decision with the chosen option and why. A decision earns a
+  `.ai/DECISIONS.md` entry, rather than staying in the plan, only when all three hold:
+  it is hard to reverse, it would surprise a reader without the context, and it was a
+  real trade-off.
+- **What is not yet specified.** A later phase whose questions you can already *state*
+  precisely gets those questions now, even unanswered; a phase you cannot yet frame a
+  precise question about is fog — name it as fog, so it is researched at that phase's
+  pickup instead of being planned on a guess.
 - **Always / Never**: what is always in scope and what is explicitly never in
   scope, so scope creep is a plan violation, not a judgment call.
 - **A Progress table** to be updated as phases land.
@@ -76,12 +95,19 @@ would run past one focused session (~2hr), needs more than 3 acceptance bullets,
 spans 2+ subsystems, or has an "and" in its title. **Slice vertically** — one
 complete path end-to-end (schema→API→UI for one feature) — not all-DB-then-all-
 API-then-all-UI. Order the highest-risk steps first (fail fast) and checkpoint
-every 2-3 steps.
+every 2-3 steps. A wide refactor that cannot land green as one vertical slice (a
+column rename, a shared type changing shape) is planned as **expand → migrate in
+batches, smallest blast radius first → contract**, each step green on its own.
 
-### 3. Front-load EVERY question — one batch, before approval
+### 3. Front-load EVERY question — before approval, in at most two gates
 
 Surface all decisions that need the user's input **upfront, batched together**,
 regardless of which phase they touch or whether they technically block anything.
+**A second gate is allowed only for dependent questions** — ones whose wording or
+options you cannot write until a first-gate answer is in. Everything that can be asked
+now goes in the first gate; the second follows straight after it, before approval, and
+nothing is ever asked mid-execution. The batch is done when no decision downstream of
+the answers is left unasked or silently assumed.
 Treat anything that would require user input mid-execution as blocking now. For
 each question, give a recommendation, not an open-ended survey. Sub-agents can't
 ask questions at all, so an unresolved decision also blocks all delegation.
@@ -95,7 +121,8 @@ deferred to mid-execution.
 
 Make each question cheap to answer — the recommendation IS the technique: attach
 your best guess to every question, because a user reacts to a wrong guess faster
-than they generate an answer from scratch. Listen for **want vs. should-want**:
+than they generate an answer from scratch. Word each question so that "yes" accepts
+the recommendation, and put the recommended option first. Listen for **want vs. should-want**:
 buzzword answers ("scalable", "clean", "modern") are usually the should-want — probe
 with "if you didn't have to justify this to anyone, what would you actually want?".
 End the batch with a one-line restate that **always includes an explicit
@@ -257,3 +284,5 @@ one: classes of questions
 that surfaced mid-stream (so future plans front-load them), plan structures that
 executed cleanly, phase-sizing that fit a session. Dedupe; read before writing
 the next plan.
+
+<!-- The dependent-question gate, yes-accepts-recommendation wording, Blocked-by frontier, expand/contract, fog, glossary challenge, the ADR admission test and design-it-twice are adapted from mattpocock/skills `grilling`, `to-tickets`, `wayfinder`, `domain-modeling` and `codebase-design` (MIT, (c) 2026 Matt Pocock). -->

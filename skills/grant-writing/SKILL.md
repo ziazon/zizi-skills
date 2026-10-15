@@ -1,21 +1,10 @@
 ---
 name: grant-writing
 description: >
-  Plan, draft, and revise competitive research grant applications — research plans,
-  mentoring/career-development plans, budget justifications, abstracts, and specific
-  aims. Invoke whenever writing or strengthening a grant proposal, auditing a draft
-  against a funder's guidelines or review criteria, framing significance/innovation,
-  responding to reviewer feedback, or preparing community-engaged/CBPR research budgets
-  — e.g. "is this responsive to the funder", "review my research plan", "strengthen my
-  mentoring plan", "check this against the guidelines". Built from real William T.
-  Grant (WTG) Scholars application work; generalizes to NIH, NSF, and foundation
-  career/research awards. Disambiguation: this skill owns proposal STRATEGY, STRUCTURE,
-  and funder alignment — it wins on structure for proposals because the funder mandates
-  the section order, whereas information-architecture is the skill for structuring
-  content whose shape is yours to decide; for sentence-level voice and word choice pair
-  with a scholarly-voice/academic-writing skill if you keep one; for study design,
-  frameworks, and IRB substance use research-methods; for non-technical/business
-  audiences use plain-language.
+  Research grant applications: research and mentoring plans, specific aims, budget
+  justifications, abstracts. Use when writing or strengthening a proposal, checking a draft
+  against a funder's guidelines or review criteria, or responding to reviewers. Owns proposal
+  strategy and structure; wording is academic-writing, study design is research-methods.
 ---
 
 # Grant writing — competitive research & career-development awards

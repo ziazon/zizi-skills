@@ -1,17 +1,10 @@
 ---
 name: data-analytics
 description: >
-  Use to understand the data an application houses and to identify high-value
-  metrics, KPIs, and charts worth surfacing — the groundwork for dashboards.
-  Invoke whenever exploring a schema/domain, planning analytics or a dashboard
-  for an app section ("what should this dashboard show?", "what metrics matter
-  here?", "add stats/charts to X"), or deciding which data points matter. Builds
-  a per-project catalog of entities, relationships, and candidate visualizations.
-  This skill decides WHAT to measure and WHY — for making the backing queries
-  fast use database-optimization; for building the chart/table UI use frontend
-  (+ tabler-ui); for chart colors/visual styling use design-guide; for which
-  dashboard a metric belongs on and the order the sections read in use
-  information-architecture.
+  Decide which metrics, KPIs and charts an app's data deserves. Use when exploring a schema or
+  domain, planning a dashboard ("what should this show?", "add stats to X"), or choosing which
+  data points matter. Keeps a per-project catalog. Query speed is database-optimization; chart
+  UI is frontend; chart colors are design-guide.
 ---
 
 # Data Analytics

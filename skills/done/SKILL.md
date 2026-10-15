@@ -1,15 +1,10 @@
 ---
 name: done
 description: >
-  Session close-out WITHOUT generating a resume prompt. Use when the user types
-  /done or asks to close out / wrap up a session where no new handoff prompt is
-  needed — either because nothing remains to resume, or because the continuation
-  prompt already exists (e.g. a standup queue's next-item flow, or a prompt the user
-  already has in hand). Runs the full handoff discipline — land in-flight work,
-  sweep loose ends, write the durable record, refresh the atlas note, shut down
-  services, git sweep, Skills Review, learnings sweep, archive — and explicitly
-  SKIPS the resume-prompt/chip step. If the session DOES need a fresh
-  self-contained resume prompt or chip, use handoff instead — never both.
+  Session close-out with no resume prompt. Use on /done, or when wrapping up a session where
+  nothing remains to resume or the continuation prompt already exists (a standup queue's next
+  item). Runs the handoff close-out minus the resume-prompt step. Need a fresh resume prompt?
+  Use handoff instead, never both.
 ---
 
 # Session Close-Out (/done)

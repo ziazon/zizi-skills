@@ -1,18 +1,10 @@
 ---
 name: plain-language
 description: >
-  Craft text that is easy to understand and engaging for non-technical readers —
-  ticket titles/descriptions, QA test steps, release notes, status updates, UI copy,
-  and any business communication. Use whenever you are writing for a non-engineer
-  audience (QA testers, product, stakeholders, end users), whenever a draft needs a
-  "make this less technical" / "say this plainly" / "rewrite this for QA" pass, or when
-  another skill asks for plain-language copy (project-manager ticket prose, daily
-  tracker comments). Not for scholarly prose — grants/manuscripts want a scholarly
-  voice instead. For how a document is structured — who it is for, what it
-  argues, and what order the sections run in — pair with information-architecture;
-  this skill owns the wording inside those sections.
-  Turns engineering detail into clear, friendly, jargon-free prose without losing
-  accuracy. Learns the user's voice over time.
+  Clear, friendly, jargon-free writing for non-technical readers: ticket text, QA steps, release
+  notes, status updates, UI copy, business messages. Use when writing for QA, product,
+  stakeholders or end users, or on a "make this less technical" pass. Scholarly prose is
+  academic-writing; document structure is information-architecture.
 ---
 
 # Plain language — clear, engaging writing for non-technical readers

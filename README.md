@@ -37,6 +37,17 @@ Before each release, the export passes `claude plugin validate --strict` and a
 check against the rules in Anthropic's plugin pre-submission checklist. The
 plugin itself runs nothing on install.
 
+## Sponsors
+
+<p align="center">
+  <a href="https://www.patreon.com/ziazizi">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ziazon/.github/main/assets/sponsors-dark.svg">
+      <img alt="Company sponsors of my open-source work. Become a sponsor on Patreon." src="https://raw.githubusercontent.com/ziazon/.github/main/assets/sponsors-light.svg" width="400">
+    </picture>
+  </a>
+</p>
+
 ## License
 
 [MIT](LICENSE). Some skills are adapted from other MIT-licensed projects; see

@@ -1,6 +1,10 @@
 ---
 name: design-assets
-description: Use whenever a task needs a visual asset — logo, icon, illustration, hero/OG/web-page graphic, empty-state art, favicon/app icon, or converting a raster reference to vector. Recraft (a generative asset tool reached through its MCP server) is called FIRST for all visual assets; Claude hand-authors only as fallback or for surgical cleanup. Covers the art-direction brief format, curation/render workflow, integration conventions, and billing/availability caveats. For visual JUDGMENT (colors, spacing, hierarchy) pair with design-guide; for Tabler component markup use tabler-ui.
+description: >
+  Visual assets: logos, icons, illustrations, hero and OG images, empty-state art, favicons,
+  raster-to-vector conversion. Use whenever a task needs one. Recraft is called first and
+  hand-authoring is the fallback; covers the art-direction brief and integration. Visual
+  judgment is design-guide.
 ---
 
 # Design assets (Recraft)

@@ -1,17 +1,10 @@
 ---
 name: tabler-ui
 description: >
-  Use when building or reviewing UI with the Tabler admin template (tabler.io) —
-  which Tabler components/utilities exist, how to compose them, and (critically)
-  the exceptions/workarounds needed to make Tabler and its companion vanilla JS
-  behave in the target framework, especially Vue 3. Invoke for ANY Tabler markup
-  decision: modals, dropdowns, badges/pills, grid columns, form inputs, icons,
-  wizards, empty states, emails — in any Tabler app. Carries the living
-  "don't use Tabler's X — use Y instead" exceptions list; consult it BEFORE using
-  any Tabler interactive component. Do NOT use for component/state/data-access
-  structure or UX flow decisions — that's the frontend skill; do NOT use for
-  color/typography/spacing judgment — that's design-guide. This skill owns "which
-  Tabler pieces, and do they break in this framework?"
+  Tabler admin template (tabler.io) components and the workarounds that make them behave in Vue
+  3. Consult before any Tabler markup or interactive component: modals, dropdowns, badges,
+  grids, forms, icons, wizards, empty states, emails. Structure is frontend; visual judgment is
+  design-guide.
 ---
 
 # Tabler UI

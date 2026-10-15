@@ -1,16 +1,11 @@
 ---
 name: code-quality
 description: >
-  Use whenever a diff is reviewed or code is cleaned up — reviewing your own diff
-  before commit, a delegated agent's returned diff, or a colleague's PR; and
-  whenever asked to clean up, tidy, de-duplicate, or remove dead code. Holds the
-  hard rules every diff is held to (one responsibility per file, readable by a
-  junior engineer, one rhythm per kind of work), the diff-review checklist, and
-  the deletion discipline: prove code is TRULY dead (no dynamic, reflective,
-  cross-package, or convention-based use) before deleting anything. This is the
-  knowledge/discipline skill — to actually RUN a review of the current diff use
-  the /code-review command, and to apply reuse/simplification fixes use
-  /simplify; pair either with the standards here.
+  Standards for reviewing and cleaning up code. Use when reviewing any diff (your own before
+  commit, a Codex or sub-agent diff, a colleague's PR) or when asked to clean up, de-duplicate
+  or delete dead code. Holds the hard rules, the review checklist (standards and spec axes),
+  module-design tests, and proof of deadness before deleting. To run a review use /code-review;
+  to apply cleanups, /simplify.
 ---
 
 # Code Quality
@@ -127,10 +122,34 @@ is usually the highest-value move available.
 performance-critical code where the simpler form is measurably slower, or a module
 about to be rewritten.
 
+## Module design: depth and seams
+
+Hard rule 1 sizes a *file*; these size a *module* — what sits behind an interface and
+where that interface is cut. A **deep** module hides a lot of behaviour behind a small
+interface; a **shallow** one makes callers learn nearly as much as it does.
+
+- **The deletion test.** Imagine inlining the module into its callers. If the total
+  complexity drops, it was a pass-through; if it rises, it was earning its keep.
+- **One adapter is a hypothetical seam; two adapters is a real one.** An interface with
+  a single implementation (and no second in sight — a test fake counts) is speculative
+  mechanism; inline it until the second one arrives.
+- **The interface is the test surface.** If the behaviour that matters can only be
+  tested by reaching past the interface, the cut is in the wrong place — move the seam
+  rather than the test.
+- **Replace, don't layer.** When interface-level tests cover a deepened module, delete
+  the old tests of the shallow pieces it absorbed; keeping both doubles the cost of
+  every later change.
+- **A new module's interface is designed twice** — see
+  [planning](../planning/SKILL.md) *Design it twice*.
+
 ## Reviewing a diff
 
 Your own before commit, a delegated agent's, or a colleague's — the same pass.
 
+- **Pin the fixed point first.** Confirm the base resolves (`git rev-parse <base>`),
+  review the three-dot diff (`git diff <base>...HEAD`, which compares against the
+  merge base, so commits that landed on the base meanwhile are not counted as yours),
+  and check it is non-empty before reading anything.
 - **Read the tests first** — they reveal intent and coverage before you read the
   implementation. Agent-written tests are where defects hide: read them at least as
   hard as the code. A loosened assertion (an exact value turned into
@@ -165,6 +184,28 @@ Your own before commit, a delegated agent's, or a colleague's — the same pass.
 - **A finding is a property of the code in front of you.** Cross-repo merge order
   and release sequencing are not findings; how the code behaves when a dependency is
   missing is.
+
+### The spec pass — the second axis
+
+Everything above asks *is this good code?* The spec pass asks *is this the change
+that was asked for?* — a different question that a standards review never answers.
+
+1. **Find the spec**, in this order: a ticket key in the branch name or commit
+   messages (fetch it and its acceptance criteria), a path the brief or plan names,
+   the plan file under `plans/`, then ask. Never review against your memory of it.
+2. **List three things, quoting the spec line for each:** requirements that are
+   missing or only partly met; changes nobody asked for (scope creep, even when they
+   are good); and requirements that *look* done but are wrong — the right field, the
+   wrong rule.
+3. **Keep the two axes in separate lists.** Do not merge or re-rank spec findings
+   into standards findings: a clean diff that builds the wrong thing must not read as
+   a minor note under a long list of nits.
+
+The session that wrote the change is anchored on its own plan and carries the most
+context pressure; a reader with only the spec and the diff has neither. On a
+high-risk PR (auth, untrusted input, money, a shared contract), or after a long
+implementation session, hand the spec pass to a sub-agent briefed with exactly those
+two inputs.
 
 ## Dead code: prove it first
 
@@ -227,6 +268,8 @@ reviewers over-report; acting blindly churns or breaks correct code.
 
 ## Reporting review findings
 
+- **Two axes, two lists:** standards findings and spec findings (above) are reported
+  under their own headings.
 - **Label every finding by severity:** **Critical** (blocks — security, data
   loss, broken functionality) / *(no prefix)* = Required — including any break of
   a hard rule / **Optional/Consider** (worth doing, not required) / **Nit** (author
@@ -316,3 +359,5 @@ style conventions adopted, dead-code false-positive traps hit in THIS codebase
 and cross-repo consumer relationships worth remembering. On handoff / "update
 skills" / after a cleanup: dedupe, merge, tag by stack/project, extract the
 general principle. Read it before quality or dead-code work.
+
+<!-- Module-design tests, the fixed-point pre-flight and the separate spec axis are adapted from mattpocock/skills `codebase-design` and `code-review` (MIT, (c) 2026 Matt Pocock); the deep-module idea is John Ousterhout's, A Philosophy of Software Design. -->

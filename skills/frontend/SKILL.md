@@ -1,19 +1,11 @@
 ---
 name: frontend
 description: >
-  Use for frontend STRUCTURE and behavior — organizing components, state, and data
-  access (typed service layer, stores, thin components), building list/table/filter
-  views, forms, and modals, loading/empty/error UX, routing/nav, SSR/public pages,
-  and web performance. Invoke whenever building or refactoring UI, adding any
-  new screen (a page, a data table, a filter, a form, a modal), or making
-  component/state/perf/UX decisions. Centered on Vue 3 + vanilla Tabler today, but
-  the approach is framework-agnostic. Do NOT use for Tabler component specifics or
-  Vue 3 workarounds ("which Tabler class/JS component, and does it fight Vue?") —
-  that's tabler-ui; do NOT use for visual/aesthetic judgment (color, typography,
-  spacing) — that's design-guide; do NOT use for which content belongs on which
-  page, or how nav is labelled and grouped — that's information-architecture (this
-  skill builds the routing, IA draws the map). These often apply to one task; this
-  skill owns the structural and behavioral side.
+  Frontend structure and behavior: components, state, a typed service layer, lists, tables and
+  filters, forms, modals, loading/empty/error states, routing, SSR, web performance. Use when
+  building or refactoring UI or adding any screen. Vue 3 + Tabler today, framework-agnostic in
+  approach. Tabler specifics are tabler-ui; visual judgment is design-guide; content placement
+  is information-architecture.
 ---
 
 # Frontend

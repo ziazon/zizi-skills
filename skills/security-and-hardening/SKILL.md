@@ -1,10 +1,11 @@
 ---
 name: security-and-hardening
 description: >
-  The security KNOWLEDGE and discipline skill — the rails a security pass gets WRONG
-  by default — credential reach, proving a control actually holds, secret-scanning
-  without leaking, SSRF/TOCTOU, and deployment-topology facts you cannot read from
-  code. Load it as the standards behind any security pass when handling user input, authentication, data storage, or external integrations, or building any feature that accepts untrusted data, manages sessions, or calls third-party services. Also load it when adding or upgrading a dependency (pnpm add, npm install, pip install, cargo add), pinning GitHub Actions or container base images, editing CI, a Dockerfile or ~/.claude/hooks, wiring an MCP server, or briefing an agent with anything credential-adjacent — and when the secret-scan hook denies a commit or push, because it says WHERE each control fires (hooks, the per-PR gate, CI, a periodic security audit) and what to do next. This is the knowledge half that sits BEHIND the built-in `/security-review` command (mirroring the code-quality-vs-`/code-review` split) — to actually RUN a review of the current diff, use `/security-review` and pair it with the standards here. Stack-specific auth patterns (auth tiers, guards, service-to-service auth) live in `service-architecture`, not here.
+  Security standards a default pass gets wrong: credential reach, proving a control holds,
+  leak-free secret scanning, SSRF/TOCTOU, deployment topology. Use when handling untrusted
+  input, auth, sessions, stored data or third-party calls; adding or upgrading a dependency;
+  pinning Actions or base images; editing CI, Dockerfiles or hooks; wiring an MCP server; or
+  when the secret-scan hook denies a commit. Run the review itself with /security-review.
 ---
 
 # Security and Hardening

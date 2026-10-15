@@ -1,6 +1,9 @@
 ---
 name: find-skills
-description: Helps users discover and install agent skills, but ONLY on an explicit request for a skill — "find/install a skill for X", "is there a skill that…", "search skills for X", or asking to extend capabilities with a new skill. Do NOT trigger on ordinary "how do I do X" questions — those are normal Q&A or belong to project-config; this skill is for when the user is explicitly shopping for an installable skill, not for answering the underlying task.
+description: >
+  Discover and install agent skills. Use only when the user explicitly asks for a skill ("find
+  or install a skill for X", "is there a skill that..."), never for an ordinary how-do-I
+  question.
 ---
 
 # Find Skills

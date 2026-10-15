@@ -1,18 +1,10 @@
 ---
 name: project-manager
 description: >
-  Keep project management in sync with the actual work, across whatever tracker the
-  current project uses (Jira, Trello, etc.). Use when the user runs /project-manager,
-  or asks to "make sure this has a ticket", "file a ticket for this", "is this tracked",
-  "audit my tickets", "find duplicate/already-done tickets", or otherwise wants the
-  tracker reconciled with reality. It (1) makes sure work is backed by a ticket, (2)
-  writes tickets QA testers can actually use, and (3) audits existing tickets for ones
-  already implemented or duplicated, linking and updating them. Also triggers on "ticket
-  this work", "write QA steps for this", "make this ticket testable", "clean up the
-  backlog". Hard gate: drafts every change and asks before mutating the tracker. This
-  skill RECONCILES the tracker (file/audit/dedupe/describe); to actually pick up and WORK
-  your assigned tickets in-session ("what should I work on", "start my day") use a
-  ticket-execution workflow instead — never both for the same request.
+  Keep the tracker (Jira, Trello, or GitHub Issues and Projects) in sync with the real work. Use
+  on /project-manager or "file a ticket", "is this tracked", "write QA steps", "audit my
+  tickets", "find duplicates", "clean up the backlog". Drafts every change and asks before
+  writing to the tracker. Working your assigned tickets is standup.
 ---
 
 # Project manager — keep the tracker honest
@@ -75,6 +67,9 @@ when your copy keeps one.)
   and tell the user you can't push to Trello automatically yet — offer to output
   ready-to-paste card text, or ask them to wire a Trello integration. Record in
   pm-config what's available.
+- **GitHub Issues and Projects** — fully supported through the `gh` CLI: issues,
+  sub-issues, blocking links and Projects (v2) boards. Mechanics, the extra token scope a
+  board needs, and how the lifecycle maps: [github.md](github.md).
 - **Other / none** — ask the user how they want work tracked; offer to produce the
   ticket text regardless.
 
@@ -120,6 +115,8 @@ Modes B–E and the release gate live in topic files — read the relevant one:
   **Mode D** (make a thin/technical ticket QA-ready). The reusable ticket format lives here.
 - **[audit.md](audit.md)** — **Mode C** (audit existing tickets: already-implemented,
   duplicates, link & update; report-then-confirm).
+- **[github.md](github.md)** — the GitHub Issues and Projects backend: `gh` commands for
+  every mode, board IDs, and how status and PR links map.
 - **[qa-feedback.md](qa-feedback.md)** — **Mode E** (triage QA testers' comments) and the
   **QA handoff & release gate** (don't move a ticket to QA/staging before it's live; notify,
   don't reassign).
@@ -140,8 +137,9 @@ metadata:
   type: project
 ---
 
-- **Tracker:** jira | trello | other
-- **Site / board:** https://<your-site>.atlassian.net  (or Trello board URL)
+- **Tracker:** jira | trello | github | other
+- **Site / board:** https://<your-site>.atlassian.net  (or Trello board URL, or GitHub
+  `owner/repo` plus the Projects board number and its status field and option IDs)
 - **Project key(s):** e.g. PORTAL
 - **QA tester:** <name / account> to assign or add as watcher on new tickets
 - **Issue types in use:** Bug, Story, Task, ...

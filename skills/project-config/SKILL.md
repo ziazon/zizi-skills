@@ -1,17 +1,10 @@
 ---
 name: project-config
 description: >
-  The memoized source of truth for HOW a project is structured and run — node
-  version (.nvmrc), env setup (.envrc/direnv), package manager, tsconfig, monorepo
-  layout, and the exact command to install / run / build / test / lint / migrate
-  each app or service. Consult it FIRST — before running, building, testing, setting
-  up, or migrating anything, and before briefing a sub-agent that will — instead of
-  re-discovering these facts every session. Invoke on any "how do I run/test/build
-  X", "set up the env", "which node/pnpm version", or before your first shell command
-  in a repo. If a needed config isn't recorded here, find it once and record it
-  immediately. Do NOT use for judgment calls: dev-tooling design → infrastructure;
-  where logic lives → service-architecture; the test loop → tdd-skill; query tuning
-  → database-optimization. This skill only records what is true right now.
+  The recorded facts of how each project runs: node version, env and direnv, package manager,
+  monorepo layout, and the exact install, run, build, test, lint and migrate commands. Consult
+  before your first shell command in a repo and before briefing an agent that will run one.
+  Record any missing fact the moment you find it.
 ---
 
 # Project Config

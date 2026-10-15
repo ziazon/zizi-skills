@@ -1,6 +1,9 @@
 ---
 name: deprecation-and-migration
-description: Manages deprecation and migration. Use when removing old systems, APIs, or features. Use when migrating users from one implementation to another. Use when deciding whether to maintain or sunset existing code. Also load it for live strangler migrations (moving logic off a legacy service into its replacement) and for shared-table expand/contract schema changes (add nullable → dual-write → backfill → switch reads → drop) where old and new code run against the DB at once.
+description: >
+  Remove or replace systems, APIs and features. Use when sunsetting code, migrating users to a
+  new implementation, running a strangler migration off a legacy service, or making an
+  expand/contract schema change while old and new code share one database.
 ---
 
 # Deprecation and Migration

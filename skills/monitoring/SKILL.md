@@ -1,16 +1,10 @@
 ---
 name: monitoring
 description: >
-  Use when you need observability into running code — adding or improving logging so
-  you (and the user) can see what the system is actually doing. Invoke whenever you:
-  add logging/instrumentation to a feature, diagnose a running service ("why is this
-  failing", "watch the logs", "what is it actually doing"), standardize log output,
-  or must confirm a change by observing the live app because reading the code or unit
-  tests can't prove it. Also load it whenever another task needs proof from a running
-  system (boot smoke check, live verification of a fix). Do NOT use for deploy/CI/
-  alerting-stack or Nomad/Consul work — that's the infrastructure skill; do NOT use
-  for writing tests — that's tdd-skill (this skill is the "eyes on live behavior"
-  half that covers what tests can't reach).
+  Observability into running code. Use when adding logging or instrumentation, diagnosing a
+  running service ("watch the logs", "what is it actually doing"), standardizing log output, or
+  when a change must be proven on the live app because tests can't reach it. Deploy and alerting
+  stacks are infrastructure; tests are tdd-skill.
 ---
 
 # Monitoring & Logging

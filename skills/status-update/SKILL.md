@@ -1,13 +1,9 @@
 ---
 name: status-update
 description: >
-  Render session status as a visual dashboard, never prose alone. Use when the
-  user types /status-update or asks "where are we", "status?", "what's left",
-  when reporting progress mid-way through a multi-item run (queue, standup,
-  migration, review sweep), and at any wrap-up that summarizes more than one
-  unit of work. Standing rule: status is ALWAYS a dashboard plus a 2-3 line
-  TLDR, never prose alone. Prose stays for reasoning, judgment, and things
-  needing a decision — state and completions get rendered, not narrated.
+  Session status as a visual dashboard plus a 2-3 line TLDR, never prose alone. Use on
+  /status-update, "where are we", "what's left", mid-way through a multi-item run, and at any
+  wrap-up covering more than one unit of work.
 ---
 
 # Status Update (/status-update)

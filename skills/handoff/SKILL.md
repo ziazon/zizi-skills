@@ -1,18 +1,10 @@
 ---
 name: handoff
 description: >
-  Use when ending or pausing a work session: the user says "hand off", "wrap up",
-  "we'll continue later", the session hits a natural phase/PR boundary, a blocker,
-  a pivot, or a drained queue. Produces a durable handoff — state saved outside the
-  chat + an exact resume point — so a FRESH session can continue without
-  re-discovery. NOTE: handoff is NOT triggered by a context-percentage threshold
-  anymore — instead write state through to the record continuously as you work (see
-  "Write-through" below) and let auto-compact pass harmlessly; hand off only at a
-  real boundary. Always run this instead of just summarizing in chat: chat history
-  is never the record. Do not use when no NEW resume prompt is needed — nothing
-  left to resume, or the continuation prompt already exists (a standup queue's
-  next-item flow) — use the done skill (/done) instead: same close-out sequence,
-  minus the resume-prompt step.
+  Durable session handoff with a resume prompt. Use when pausing or ending work at a real
+  boundary (a phase or PR done, a blocker, a pivot, a drained queue) or when the user says "hand
+  off" or "we'll continue later". Saves state outside the chat plus an exact resume point, never
+  just a chat summary. No new resume prompt needed? Use done.
 ---
 
 # Session Handoff
@@ -311,6 +303,28 @@ In a long multi-item session, don't save this all for the end — run it at each
 completed phase/PR boundary while the work is fresh, and let the handoff-time
 review cover only what's landed since the last one.
 
+**Then review the environment, not the work.** The Skills Review grades what was
+built; this asks what made building it slower or riskier than it needed to be. Read
+the session (the transcript, not your memory of it — see step 7) and list findings
+**most severe first**, each with a proposed change, under these headings — skip any
+with nothing in it:
+
+- **Navigation** — information that took long to find; a pointer that would have saved it.
+- **Automated checks** — a mistake a lint, type check, test or hook could have caught,
+  or a repo with no guardrail at all. Check the repo's own check command first: an
+  existing check that sits unwired or silently broken is the finding.
+- **Standards** — a review miss. A **mechanical** miss (a banned API, an import shape,
+  a file location) gets a deterministic check — a lint rule, a hook, a CI step —
+  never a new prose rule; prose is for genuine judgement calls only.
+- **Steering files** — a rule in `AGENTS.md`/`CLAUDE.md` or the global rulebook that
+  belongs in a check or a skill instead, or that changed nothing (a no-op).
+- **Tool economy** — an expensive call or tool that a cheaper route would have replaced.
+- **Information access** — something the session needed and could not see (logs,
+  read-only access to a service).
+
+Each finding becomes a resume point, a learnings entry, or a proposed PR — never a
+rule edited in place.
+
 ### 7. Per-skill learnings sweep
 
 Learnings are captured **write-through** — appended to the relevant skill's
@@ -534,3 +548,5 @@ Accumulate handoff-quality lessons in `LEARNINGS.md` beside this skill, when you
 keeps one: resume points
 that turned out too vague, state that got lost anyway and why, per-project handoff
 file locations. Dedupe and read it before writing the next handoff.
+
+<!-- The environment review's headings and its mechanical-miss-becomes-a-check rule are adapted from mattpocock/skills `retro` (MIT, (c) 2026 Matt Pocock). -->

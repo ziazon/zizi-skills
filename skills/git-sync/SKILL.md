@@ -1,16 +1,10 @@
 ---
 name: git-sync
 description: >
-  Use whenever doing git branch work — starting a task, committing, pushing,
-  rebasing, amending, opening a PR, or cleaning up after a merge. Keeps local
-  and origin in sync: work always on a dedicated branch (never main), main
-  always current (fetch-only), the working branch rebased onto latest main (and
-  onto any branch it depends on), every branch pushed, force-push after any
-  history rewrite, PRs reported only when their checks are green, and stale
-  local branches pruned when their remote is gone. Invoke at the start of any
-  branch work and before every commit/push/PR — and run the end-of-work/handoff
-  sweep (prune merged branches + remove merged worktrees) before archiving a
-  session. This is the standing git workflow, not an on-request tool.
+  The standing git workflow. Use at the start of any branch work and before every commit, push,
+  rebase or PR: your own branch (never main), rebased on current main, every branch pushed, PR
+  bodies in the standard shape, PRs reported only when green, and merged branches and worktrees
+  pruned before a session ends.
 ---
 
 # Git Sync
@@ -201,6 +195,28 @@ a multi-worktree removal in the background (see `LEARNINGS.md` beside this skill
 when your copy keeps one). Re-check `git status --porcelain` right before each
 removal and let plain `git worktree remove` (never `--force` on unseen state)
 refuse a dirty tree.
+
+## The PR body
+
+Every PR description has the same three parts, in this order:
+
+1. **Summary — the smallest visual that makes the change clear.** Pseudocode of the
+   new flow, a call tree, a file-tree diff, a before/after table, or a mermaid
+   diagram; prose only for what the visual cannot carry. One or two sentences of
+   *why*, and the ticket link.
+2. **Evidence — before and after.** A screenshot or recording for UI; otherwise the
+   exact command whose output was red before and green now (name the regression
+   test). Every claim in the body is one you checked: colleagues read it as fact.
+3. **Merge danger.** Two lines: `Door: one-way | two-way` and `Blast radius:
+   <one word>` (none, module, service, data, users). Two-way means a plain revert
+   fully undoes it. A one-way call names the checked fact that makes it so — a
+   destructive migration, a published contract, a message sent, a branch that
+   deploys on merge — and a one-way door gets an independent second review before
+   merge.
+
+Nothing else is required, and an AI attribution line is never allowed (hard gate 3).
+
+<!-- PR body shape adapted from mattpocock/skills `pr` (MIT, (c) 2026 Matt Pocock). -->
 
 ## End-of-work / handoff / archive sweep (MANDATORY)
 

@@ -1,18 +1,10 @@
 ---
 name: design-guide
 description: >
-  Use when visual/UX design judgment is needed — color palettes, typography,
-  spacing/hierarchy, theme selection, and applying design best practices. Invoke
-  whenever choosing colors or themes, picking status/badge colors, designing a
-  screen's look, making something "look better / more professional / polished",
-  white-label/partner theming, or reviewing a UI for visual quality. Aimed at a
-  design-averse user who wants design decisions made well on their behalf; records
-  design preferences and good-practice references over time. Scope is visual/
-  aesthetic judgment ONLY — for component/state/data-access structure use the
-  frontend skill; for Tabler component specifics and Vue workarounds use tabler-ui;
-  for which content belongs on the screen at all, and in what order, use
-  information-architecture. These often apply to one screen; this skill decides how
-  it should look.
+  Visual and UX judgment: color, typography, spacing, hierarchy, themes. Use when choosing
+  colors or status/badge colors, theming (white-label included), making a screen "look better"
+  or more polished, or reviewing a UI's visual quality. Decides how it looks; structure is
+  frontend, Tabler specifics are tabler-ui, content placement is information-architecture.
 ---
 
 # Design Guide
