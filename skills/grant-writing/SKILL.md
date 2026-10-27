@@ -1,5 +1,6 @@
 ---
 name: grant-writing
+category: Writing & research
 description: >
   Research grant applications: research and mentoring plans, specific aims, budget
   justifications, abstracts. Use when writing or strengthening a proposal, checking a draft
@@ -29,10 +30,7 @@ Goal: help build a proposal that is **responsive to the funder**, **rigorous**, 
 
 ## The first move is always responsiveness, not prose
 
-Before drafting or polishing anything, **audit the draft element-by-element against the
-funder's published required-components list and review criteria.** A beautifully written
-proposal that is *out of scope* for the funder loses. Name the gaps by category first,
-then fix in priority order.
+A beautifully written proposal that is *out of scope* for the funder loses.
 
 The single highest-leverage check: **does the proposal center what the funder funds?**
 
@@ -69,6 +67,13 @@ subject of your Significance and aims.
    limits) — it's a real screen.
 6. **Fix the most critical gap first**, with surgical tracked changes confined to the
    affected section, then work down by impact.
+
+Record the walk as one table, a row per required element (formatting and mentoring-plan
+items included), ordered by fix priority:
+
+| Required element | Funder's wording (verbatim) | Status | Why | Gap category | Fix priority |
+| --- | --- | --- | --- | --- | --- |
+| <element> | "<quoted from the guidelines>" | present / weak / missing | <reason> | <category from step 3> | 1 = most critical |
 
 ## Anatomy of the components
 
@@ -143,12 +148,6 @@ including annual reports.
   partnership against the dollars.
 
 ## Do's & don'ts
-
-**Do:** audit responsiveness before prose; center the fundable unit; name the specific
-outcome inequality with mechanism; give every data source an analysis plan; a standalone
-human-subjects section; state generalizability/power and policy relevance; concrete
-numbers over abstractions; named mentor for every year; explicit community/participant
-budget lines; check the exact formatting spec.
 
 **Don't:** center causes/consequences when the funder funds practices; frame the
 population as "vulnerable/at-risk" instead of knowledge holders; claim CBPR/YPAR without

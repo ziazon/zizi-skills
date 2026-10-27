@@ -8,10 +8,21 @@
 # real staging screenshot).
 #
 # Usage:
-#   lh-audit.sh <url> [desktop|mobile|both] [outdir]
+#   lh-audit.sh [--runs N] [--since <ref> [--until <ref>] --paths <file> [--repo <dir>]]
+#     <url> [desktop|mobile|both] [outdir]
 #
 # Examples:
-#   lh-audit.sh http://127.0.0.1:8083/ both ./.lighthouse
+#   lh-audit.sh https://example.invalid/ both ./.lighthouse
+#   lh-audit.sh --runs 3 https://example.invalid/ both
+#   lh-audit.sh --since v1 --paths watched.txt https://example.invalid/
+#   lh-audit.sh --since v1 --until v2 --paths watched.txt https://example.invalid/
+#   lh-audit.sh --since v1 --paths watched.txt --repo . https://example.invalid/
+#   watched.txt: one prefix ending in / or whole-path shell glob per line;
+#     blank lines and # comments are ignored. Options may follow positionals.
+#
+# --until and --repo require --since; --repo defaults to the current directory.
+# Exit: 0 audited or skipped; 1 Lighthouse missing or a run failed;
+#       2 usage error or bad git ref.
 #
 # Requires: node, Google Chrome, and the `lighthouse` CLI on PATH (install it
 # yourself, e.g. `npm install -g lighthouse@13.5.0`; this script never downloads it).
@@ -21,48 +32,146 @@
 
 set -euo pipefail
 
+usage() {
+  echo 'usage: lh-audit.sh [--runs N] [--since <ref> [--until <ref>] --paths <file> [--repo <dir>]] <url> [desktop|mobile|both] [outdir]' >&2
+  exit 2
+}
+RUNS=1
+SINCE=
+UNTIL=HEAD
+PATHS=
+REPO=.
+has_since=0
+has_paths=0
+has_until=0
+has_repo=0
+positionals=()
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --runs|--since|--until|--paths|--repo)
+      [ "$#" -ge 2 ] || usage
+      case "$2" in ''|--*) usage ;; esac
+      case "$1" in
+        --runs) RUNS=$2 ;;
+        --since) SINCE=$2; has_since=1 ;;
+        --until) UNTIL=$2; has_until=1 ;;
+        --paths) PATHS=$2; has_paths=1 ;;
+        --repo) REPO=$2; has_repo=1 ;;
+      esac
+      shift 2 ;;
+    --*) usage ;;
+    *) positionals+=("$1"); shift ;;
+  esac
+done
+case "$RUNS" in [1-9]) ;; *) usage ;; esac
+[ "$has_since" -eq "$has_paths" ] || usage
+if [ "$has_since" -eq 0 ] && { [ "$has_until" -eq 1 ] || [ "$has_repo" -eq 1 ]; }; then usage; fi
+[ "${#positionals[@]}" -gt 0 ] || usage
+set -- "${positionals[@]}"
 URL="${1:?usage: lh-audit.sh <url> [desktop|mobile|both] [outdir]}"
 FORM="${2:-both}"
 OUTDIR="${3:-./.lighthouse}"
-STAMP="$(date +%Y%m%d-%H%M%S)"
-SLUG="$(printf '%s' "$URL" | sed -E 's#https?://##; s#[^a-zA-Z0-9]+#-#g; s#-+$##')"
+
+if [ "$has_since" -eq 1 ]; then
+  if [ ! -f "$PATHS" ] || [ ! -r "$PATHS" ]; then usage; fi
+  changed_dir=$(mktemp -d "${TMPDIR:-/tmp}/lh-audit-paths.XXXXXX")
+  trap 'rm -rf "$changed_dir"' EXIT
+  git -C "$REPO" diff --name-only -z "$SINCE..$UNTIL" > "$changed_dir/paths" || exit 2
+  patterns=()
+  while IFS= read -r pattern || [ -n "$pattern" ]; do
+    case "$pattern" in ''|\#*) continue ;; esac
+    patterns+=("$pattern")
+  done < "$PATHS"
+  matched=()
+  while IFS= read -r -d '' path; do
+    [ -n "$path" ] || continue
+    # Bash 3.2 with nounset cannot expand an empty array.
+    if [ "${#patterns[@]}" -gt 0 ]; then
+      for pattern in "${patterns[@]}"; do
+        case "$pattern" in
+          */)
+            case "$path" in "$pattern"*) matched+=("$path"); break ;; esac ;;
+          *)
+            # The file deliberately supplies whole-path shell globs.
+            # shellcheck disable=SC2254
+            case "$path" in $pattern) matched+=("$path"); break ;; esac ;;
+        esac
+      done
+    fi
+  done < "$changed_dir/paths"
+  count=${#matched[@]}
+  if [ "$count" -eq 0 ]; then
+    echo "lh-audit: no watched path changed in $SINCE..$UNTIL; skipping"
+    exit 0
+  fi
+  echo "lh-audit: watched paths changed in $SINCE..$UNTIL:"
+  for ((i=0; i<count && i<20; i++)); do
+    printf '  %s\n' "${matched[i]}"
+  done
+  if [ "$count" -gt 20 ]; then printf '  … and %s more\n' "$((count - 20))"; fi
+fi
 
 command -v lighthouse >/dev/null 2>&1 || {
   echo "lh-audit.sh: the lighthouse CLI is not on PATH; install it first (e.g. npm install -g lighthouse@13.5.0)" >&2
   exit 1
 }
 
+STAMP="$(date +%Y%m%d-%H%M%S)"
+SLUG="$(printf '%s' "$URL" | sed -E 's#https?://##; s#[^a-zA-Z0-9]+#-#g; s#-+$##')"
 mkdir -p "$OUTDIR"
 
 run_one() {
   local preset="$1"          # desktop | mobile
   local base="${OUTDIR}/${STAMP}_${SLUG}_${preset}"
   echo "▶ Lighthouse ${preset}: ${URL}"
-  # --preset=desktop applies desktop viewport + no throttling; omitting it = the
-  # default MOBILE profile (Moto-G-class CPU 4x throttle + slow-4G) — much harsher,
-  # and the fair target for a mobile-first audit. Keep both to compare like-for-like.
-  local flags=(--only-categories=performance,accessibility,best-practices,seo,agentic-browsing
-               --output=json --output=html
-               --output-path="${base}"
-               --chrome-flags="--headless=new --no-extensions --no-sandbox"
-               --quiet)
-  [ "$preset" = "desktop" ] && flags+=(--preset=desktop)
-  lighthouse "$URL" "${flags[@]}" >/dev/null
+  local k run_base
+  local reports=()
+  for ((k=1; k<=RUNS; k++)); do
+    run_base="$base"
+    if [ "$RUNS" -gt 1 ]; then run_base="${base}_run${k}"; fi
+    reports+=("$run_base")
+    # Desktop uses its preset; omitting it keeps the default mobile profile.
+    local flags=("--only-categories=performance,accessibility,best-practices,seo,agentic-browsing"
+                 --output=json --output=html
+                 --output-path="${run_base}"
+                 --chrome-flags="--headless=new --no-extensions --no-sandbox"
+                 --quiet)
+    if [ "$preset" = "desktop" ]; then flags+=(--preset=desktop); fi
+    lighthouse "$URL" "${flags[@]}" >/dev/null || exit 1
+  done
 
-  # Lighthouse writes <base>.report.json / <base>.report.html
-  node - "$base" "$preset" <<'NODE'
+  # Lighthouse writes <base>.report.json / <base>.report.html per run.
+  node - "$preset" "${reports[@]}" <<'NODE'
 const fs = require('fs');
-const [base, preset] = process.argv.slice(2);
-const r = JSON.parse(fs.readFileSync(base + '.report.json', 'utf8'));
-const pct = c => r.categories[c] ? Math.round(r.categories[c].score * 100) : 'n/a';
+const [preset, ...bases] = process.argv.slice(2);
+const reports = bases.map(base => JSON.parse(fs.readFileSync(base + '.report.json', 'utf8')));
+const median = values => {
+  const sorted = values.slice().sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+};
+const ranked = reports.map((r, i) => ({r, base: bases[i]}))
+  .sort((a, b) => a.r.categories.performance.score - b.r.categories.performance.score);
+const {r, base} = ranked[Math.floor((ranked.length - 1) / 2)];
+const pct = c => {
+  if (reports.length === 1) return r.categories[c] ? Math.round(r.categories[c].score * 100) : 'n/a';
+  const scores = reports.map(report => report.categories[c]?.score);
+  return scores.every(score => typeof score === 'number') ? Math.round(median(scores) * 100) : 'n/a';
+};
 const line = (l, v) => console.log('  ' + l.padEnd(16) + v);
-console.log(`\n═══ ${preset.toUpperCase()} — ${r.finalDisplayedUrl || r.finalUrl} ═══`);
+console.log(`\n═══ ${preset.toUpperCase()} — ${r.finalDisplayedUrl || r.finalUrl}${reports.length > 1 ? ` — median of ${reports.length}` : ''} ═══`);
 line('Performance', pct('performance'));
 line('Accessibility', pct('accessibility'));
 line('Best Practices', pct('best-practices'));
 line('SEO', pct('seo'));
 line('Agentic Brows.', pct('agentic-browsing'));
-const m = id => (r.audits[id] && r.audits[id].displayValue) || '—';
+const m = id => {
+  if (reports.length === 1) return (r.audits[id] && r.audits[id].displayValue) || '—';
+  const values = reports.map(report => report.audits[id]?.numericValue);
+  if (!values.every(value => typeof value === 'number')) return '—';
+  const value = median(values);
+  return id === 'cumulative-layout-shift' ? value.toFixed(3) : `${Math.round(value)} ms`;
+};
 console.log('  Core Web Vitals / metrics:');
 line('  LCP', m('largest-contentful-paint'));
 line('  TBT', m('total-blocking-time'));

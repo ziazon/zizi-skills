@@ -3,6 +3,17 @@
 Gotchas building Claude Code tooling: custom slash-command arg passing, local scheduled jobs
 (launchd), daily-gated SessionStart hooks, and generating Markdown that embeds Markdown.
 
+## Contents
+
+- [Claude Code] custom slash commands — arg-passing gotchas (personal /todo CLI)
+- [Claude Code] local scheduled jobs via launchd (macOS)
+- [Claude Code] daily-gated SessionStart hook (run once per day, cheaply)
+- [Claude Code] gotchas when generating Markdown that EMBEDS Markdown
+- Node version: Claude Code's THREE environments ≠ your shell (nvm)
+- [Claude Code] gating a generated-doc export on markdown lint
+- Capability-aware shared tooling installers (2026-07-10)
+- [Claude Code] launchd self-updater for a locally built app (2026-09-29)
+
 ## [Claude Code] custom slash commands — arg-passing gotchas (personal /todo CLI)
 
 Building a `~/.claude/commands/<x>.md` that shells out to a script (`!`node script $ARGUMENTS``):

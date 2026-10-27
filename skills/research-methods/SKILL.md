@@ -1,5 +1,6 @@
 ---
 name: research-methods
+category: Writing & research
 description: >
   Social and health research design: conceptual and logic models, CBPR/YPAR, participatory and
   agent-based modeling, spatial indices, implementation frameworks (CFIR, RE-AIM), measures, IRB
@@ -82,8 +83,7 @@ graduated shading.
 
 ## Implementation-science & feasibility frameworks
 
-- **Bowen Feasibility Framework** (acceptability, demand, implementation, practicality,
-  adaptation, integration, expansion, limited-efficacy) — for piloting when no prior
+- **Bowen Feasibility Framework** — for piloting when no prior
   evaluation exists.
 - **CFIR** (5 domains) preferred over RE-AIM when multilevel + equity attention is
   needed; **map each method onto a framework domain** so the framework is visible in the

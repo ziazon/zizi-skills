@@ -1,5 +1,6 @@
 ---
 name: project-manager
+category: Workflow
 description: >
   Keep the tracker (Jira, Trello, or GitHub Issues and Projects) in sync with the real work. Use
   on /project-manager or "file a ticket", "is this tracked", "write QA steps", "audit my
@@ -9,7 +10,7 @@ description: >
 
 # Project manager — keep the tracker honest
 
-You are the overarching project-management eye across everything the user works on. Your
+Your
 job is to make sure that **real work is reflected in the tracker** and that **tickets
 are written so a non-technical QA tester can verify them.** You operate on whatever
 tracker the current project uses — don't assume Jira.
@@ -54,6 +55,11 @@ when your copy keeps one.)
 
 ### Tracker backends
 
+- **The install's tracker CLI comes first.** Where your install wraps its trackers in one
+  CLI (this install's, with every command it runs: `LOCAL.md` beside this skill, when your
+  copy keeps one), every read and write this skill makes goes through that CLI. The connector
+  and `gh` routes below are then kept only for the verbs the CLI lacks, and `LOCAL.md` names
+  each one. Without such a CLI, the routes below are the whole backend.
 - **Jira** — fully supported via the `mcp__atlassian__*` MCP tools. If those tools
   aren't loaded, use `ToolSearch` (`select:` the names, or query `atlassian jira`).
   If the server isn't authenticated, tell the user to run `/mcp` → atlassian →
@@ -62,13 +68,14 @@ when your copy keeps one.)
   `getJiraIssue`, `createJiraIssue`, `editJiraIssue`, `addCommentToJiraIssue`,
   `createIssueLink`, `getIssueLinkTypes`, `getTransitionsForJiraIssue`,
   `transitionJiraIssue`.
-- **Trello** — no MCP tools wired yet. If the project uses Trello, do as much as you
+- **Trello** — no MCP tools wired yet; without a tracker CLI that covers Trello, do as much as you
   can (draft the cards' titles/descriptions/checklists in the same QA-friendly format),
   and tell the user you can't push to Trello automatically yet — offer to output
   ready-to-paste card text, or ask them to wire a Trello integration. Record in
   pm-config what's available.
 - **GitHub Issues and Projects** — fully supported through the `gh` CLI: issues,
-  sub-issues, blocking links and Projects (v2) boards. Mechanics, the extra token scope a
+  sub-issues, blocking links and Projects (v2) boards (a tracker CLI that covers the board
+  replaces the `gh` reads and writes it has verbs for). Mechanics, the extra token scope a
   board needs, and how the lifecycle maps: [github.md](github.md).
 - **Other / none** — ask the user how they want work tracked; offer to produce the
   ticket text regardless.
@@ -176,16 +183,11 @@ Other projects: record their workflow in pm-config and follow it the same way.
   someone who can't read the code. Plain-language skill is mandatory for the prose.
 - **Security by reach.** Multi-role features get explicit "lower tier must not be able
   to…" test bullets — mirror the user's internal-field-route-authority preference.
-- **Confirm before mutating.** Drafts for creation, reports for changes. Ask when
-  unsure.
 - **Honor the user's git/workflow rules** when suggesting branch/PR/commit ticket
   references (own-branch, linear history, no AI attribution).
 
 ## Common failure modes — if you're about to do one of these, stop
 
-- **Mutating the tracker without approval.** Any create/edit/transition/link/comment
-  you didn't draft-and-confirm this session (and that isn't a durably pre-authorized
-  lifecycle move you can name) violates the approval gate. Stop and ask first.
 - **Collapsing a list into a count.** "Found 7 duplicates" is unusable — name EVERY
   ticket (key + title) in every report, roster, and audit result. The user requires
   each item enumerated, never summarized to a number.

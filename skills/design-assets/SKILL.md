@@ -1,5 +1,6 @@
 ---
 name: design-assets
+category: Design
 description: >
   Visual assets: logos, icons, illustrations, hero and OG images, empty-state art, favicons,
   raster-to-vector conversion. Use whenever a task needs one. Recraft is called first and
@@ -34,6 +35,9 @@ raster→vector conversion. Claude hand-authors an asset itself only when:
 Recraft never decides direction. Claude briefs; the user picks from rendered
 candidates; Claude integrates.
 
+Product demo videos are recorded from the app, not generated: follow
+[demo-video.md](demo-video.md).
+
 ## Workflow
 
 1. **Read the design context first.** design-guide (LEARNINGS + standing
@@ -45,7 +49,17 @@ candidates; Claude integrates.
    palette hexes, background (transparent unless told otherwise), output type
    (**vector/SVG for logos and icons — always**; raster only for
    photographic/painterly work), size, and N variants.
-   Record the brief — it gets committed with the asset.
+   Record the brief — it gets committed with the asset:
+
+   ```
+   Subject:     <one concept; one per generation>
+   Style:       <style and substyle, e.g. vector_illustration>
+   Palette:     <#hex, #hex, ...>
+   Background:  transparent (unless told otherwise)
+   Output:      SVG for logos and icons; raster only for photographic/painterly work
+   Size:        <width x height>
+   Variants:    <N>
+   ```
 3. **Check the balance when planning a large batch** — `get_user` is free. Single
    images cost ~$0.04–0.08; a 6–8 concept exploration is cents, a 100-asset sweep
    is real money — ask before those. The balance lives behind the MCP server, and
@@ -55,7 +69,8 @@ candidates; Claude integrates.
    `LOCAL.md` beside this skill, when your copy keeps one — *Balance reporting*.)
 4. **Generate, then curate.** Pull the results, drop weak ones, and render the
    survivors into a labeled comparison (montage on light AND dark backgrounds —
-   design-guide's render-candidates rule). The user picks; Claude never ships an
+   design-guide's render-candidates rule; its `scripts/montage.sh` does the render, with the
+   existing marks passed as `--ref`). The user picks; Claude never ships an
    asset the user hasn't seen rendered in context.
 5. **Integrate like an engineer.** svgo-clean the SVG; convert fixed colors to
    `currentColor`/CSS vars where the asset must follow theme; derive

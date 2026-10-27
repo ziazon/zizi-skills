@@ -22,10 +22,6 @@ Vue 3 reactivity. USE `vue-final-modal` behind one app-level modal wrapper compo
   "Manage X" should open the modal wrapper via `useModal`, never `router.push` to a full-page
   view that replaces the list with no close button. (The frontend skill has the
   modal-vs-page heuristic.)
-- **Modal focus management (a11y):** on open, move focus into the dialog; trap focus inside it
-  while it's open (Tab must not escape to the page behind); and return focus to the trigger
-  element on close. Without this, keyboard/screen-reader users land nowhere on open and lose
-  their place on close.
 
 ## Dropdowns inside scroll/overflow containers (esp. data tables)
 

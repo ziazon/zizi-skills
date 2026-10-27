@@ -5,6 +5,15 @@ During planning, walk every section below against the codebase and record each h
 row in the plan (surface, location, owner, phase). During review, ask which row a new
 string belongs to. Grep patterns are starting points — confirm each by reading.
 
+## Contents
+
+- A. In the UI code
+- B. In data (missed most often)
+- C. From the server
+- D. Out of the app
+- E. Formatting (not strings, still locale)
+- Grep starters
+
 ## A. In the UI code
 
 1. **Template text** — headings, labels, buttons, table headers, empty states, tooltips.

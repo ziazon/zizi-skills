@@ -1,5 +1,6 @@
 ---
 name: orchestration
+category: Workflow
 description: >
   Run multi-step or long-running work as an orchestrator over disposable sub-agents. Use at the
   start of a program phase, migration, broad sweep, deep research or many-file job, or when your
@@ -44,7 +45,26 @@ A worker knows nothing about this conversation. Every brief includes:
   exit-gate (consult the project-config skill for the exact commands rather than
   letting the worker rediscover them).
 - **Report format**: pass/fail per check + concise summary + diff stat — not raw
-  exploration.
+  exploration — closing with one line each for what it skipped or could not run,
+  where it deviated from the brief and why, and the risks it sees. A worker that ends
+  on "done" has hidden the part you most need to read.
+- **Timebox**: how long the task should take; on expiry the worker stops and returns
+  partial findings in the same report format rather than pressing on.
+
+A brief missing one of these fields is not ready to dispatch.
+
+```text
+Goal: <what>. Done when <definition of done>.
+Scope: touch <files / paths / symbols>; do NOT touch <...>.
+Decisions made: <decision>, because <why>; ...
+Constraints: <repo conventions>; read <skills>; <style rules>.
+Verify: <lint / test / build commands>; exit gate: <live check, if any>.
+Report: pass/fail per check, a concise summary, the diff stat; then one line each:
+  Skipped or could not run: <...>
+  Deviated from the brief: <where, and why>
+  Risks: <...>
+Timebox: <duration>. On expiry, stop and return partial findings in this report format.
+```
 
 **The brief is where errors get laundered.** A worker executes it faithfully and
 cannot notice it is wrong — it can't ask. So every unverified premise in the brief
@@ -125,15 +145,20 @@ The contract, stated in the Scout's own brief:
 - **Tag every line** either `verified — <the exact command that produced it>` or
   `belief — check independently`. An untagged assertion is a defect in the pack.
 - **State every negative as a statement about the pattern, not the world.** Write
-  "my grep for `X` over `*.ts` did not match", never "there is no X". The failure this
-  prevents is real: two "established facts" handed to a research agent were both
-  artifacts of a bad glob (`*.nomad.hcl` missing all 19 files actually named
-  `service.nomad`), and the correction inverted an entire plan.
+  "my grep for `X` over `*.ts` did not match", never "there is no X".
 - **Never truncate the search that defines the work-list.** Count first, then read all
   of it, and state any cap as a hypothesis the next reader can contradict.
 - **No interpretation, no proposed fix.** The Scout finds; the orchestrator decides. A
   Scout that returns a recommendation has smuggled a judgment past the point where it
   could be checked.
+
+```text
+Evidence pack: <the question the Scout was sent with>
+- <finding> | verified: `<exact command that produced it>`
+- <finding> | belief: check independently
+- My grep for `<pattern>` over `<glob>` did not match | verified: `<command>`
+Work-list: `<search command>` found <N>; read all <N> (any cap stated as a hypothesis)
+```
 
 Then carry the tags *forward* into the brief rather than flattening them — the whole
 value is that the delegate can see which facts to trust and which to re-check. A
@@ -143,6 +168,10 @@ not a Scout task. (This install's seat definitions: `LOCAL.md` beside this skill
 your copy keeps one — section *Seat definitions*.)
 
 ### 3. Partition parallel work by disjoint files
+
+**Pilot one unit before fanning out.** Push a single unit through the whole path —
+brief, worker, verification, land — and fix the brief template from what it shows,
+before sending the rest. A defect in a template is paid once per copy.
 
 Two agents editing the same file in one working tree corrupt each other. Fan out
 in parallel only when file sets are disjoint (launch them in a single message so
@@ -156,6 +185,12 @@ take "done" on faith: spot-check the claims that matter (run the exit-gate
 yourself, read the critical hunk). Pull the FULL diff into your context only at
 review/commit time — and when code changed, surface the complete diff inline to
 the user per the "showing your work" rule.
+
+Before the integrated result is reported as done, hold it against the owner's judgment lens,
+when this install keeps one: one read, then a check against its top items, with each miss
+fixed or named in the report. The lens predicts how the owner judges work; it never approves,
+decides or speaks for them. (This install's lens: `LOCAL.md` beside this skill, when your copy
+keeps one, *Owner lens*.)
 
 > **Some delegate sandboxes have no network and cannot bind sockets** (e.g. `listen
 > EPERM 0.0.0.0`). This is the single most important qualifier on "workers
@@ -262,6 +297,10 @@ discipline:
 - **Bound the review to ~3 cycles with escalation.** "Doubt theater" signal: 2+
   cycles with substantive findings but zero classified as actionable means you're
   validating, not doubting — stop and escalate.
+- **A dry round ends the fix → re-review loop.** When a round resolves nothing,
+  actions nothing and raises nothing new, stop. A fix commit that is doc-only, or a
+  mechanical change under ~20 lines that existing checks already prove, does not earn
+  another review round. (Adapted 2026-10-17 from PostHog's pr-shepherd.)
 - **When piping an artifact to an external CLI, pass it on stdin, not
   interpolated inline** (backticks/`$()` in artifacts are a shell-injection
   hazard); run the reviewer read-only.
@@ -295,9 +334,7 @@ The most valuable sentence of a run is often after the code.
 - **A delegate's "the tooling is broken in my sandbox" can be a real, fixable bug.**
   One reported a missing dependency, which pattern-matched to its known sandbox limits;
   it was actually an incomplete install in the shared `node_modules`, fixed by
-  `pnpm install --frozen-lockfile`. Verify the environment claim rather than filing it
-  under known limits — the delegate cannot distinguish "my sandbox forbids this" from
-  "this repo is broken."
+  `pnpm install --frozen-lockfile`.
 - **Output density is not a completeness signal.** A 44-line view can be a complete
   implementation. Judge against the brief's checklist, not `wc -l`.
 
@@ -321,6 +358,12 @@ The most valuable sentence of a run is often after the code.
 - **A partial run is normal, not a failure.** Dispatch a focused follow-up naming only
   the missing files ("X, Y and Z are already done — do NOT redo them") rather than
   re-running the whole brief.
+- **New direction goes to a fresh agent with consolidated scope.** When the follow-up
+  carries decisions made after the first brief, write a new brief holding the original
+  scope, every later directive and the prior report, rather than messaging the old
+  agent a delta. Resume an agent only for live state it holds (a checkout, a running
+  server). (This and the pilot and timebox rules adapted 2026-10-17 from pstack and
+  cursor/plugins' `orchestrate`, both MIT.)
 - **A dispatch can arrive LATE and clobber you.** One forwarded ~2.5 minutes after it
   was written off as a no-op, then re-edited files that had been hand-fixed meanwhile.
   Cancel stragglers before editing anything in a job's blast radius.
@@ -370,27 +413,11 @@ land or WIP-commit the in-flight unit first.
   tool, "use a workflow"/ultracode): only on the user's explicit opt-in — it
   spends a lot of tokens and the user must choose that, never you.
 
-## Common failure modes
-
-- **Doing the broad read inline** ("let me just look through these 30 files
-  first") — that's the exact work that should burn a worker's context, not yours.
-- **Delegating an open question.** The worker will guess, and you'll ship the
-  guess. Lock it or ask the user first.
-- **Briefs that assume conversation context** ("fix the issue we discussed").
-  The worker never saw the discussion.
-- **Two parallel workers, one file.** Silent mutual clobbering; partition first.
-- **Relaying a worker's "done" without evidence.** Require pass/fail + what was
-  run; spot-verify before you report success to the user.
-- **Over-orchestrating.** A one-line fix behind three sub-agents wastes tokens
-  and time; scale down for trivial work.
-
 ## Before you call this done
 
 - [ ] Every delegated brief was self-contained and decision-complete
-- [ ] Parallel workers had disjoint file sets (or isolated worktrees)
 - [ ] Each worker returned verification evidence; you spot-checked the critical claims
 - [ ] You ran the final integration review and the full diff was shown inline
-- [ ] Program state / resume point saved to memory if the work continues
 
 ## Related skills
 

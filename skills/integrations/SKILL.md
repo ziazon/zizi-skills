@@ -1,5 +1,6 @@
 ---
 name: integrations
+category: Engineering
 description: >
   Connect to or automate third-party services: REST APIs, MCP servers, OAuth and tokens,
   webhooks, recurring syncs. Use when building or debugging an integration, scheduling a job
@@ -37,7 +38,20 @@ the work built on top of it when skipped.
    actually live. Gate: don't build unattended automation on an auth/data source that
    only exists in an interactive session.
 5. **Build deterministic compute + idempotent write + state file + once-per-period
-   guard** (section below).
+   guard** (section below). Start from the skeleton, which has all of it except the two
+   pieces you replace: copy `<skill-dir>/scripts/sync-template.py` into the project and
+   rewrite only the `# REPLACE:` blocks (`compute()`, which returns the whole current value,
+   never a delta; and `Sink`, with `create`/`read`/`update`/`is_locked`). It runs as is on a
+   demo source, so try it first:
+
+   ```sh
+   python3 sync-template.py --config <cfg.json> --state <state.json> [--apply] [--force] [--today YYYY-MM-DD]
+   ```
+
+   Without `--apply` it only prints `would create …` / `would update <period> <id>: <old> -> <new>` /
+   `unchanged`. Exit 0 done or nothing to do (including `already ran today` and a record the
+   destination has locked); 1 the sink failed (state left as it was); 2 an unreadable or
+   malformed config, state or source; 3 another run holds `<state>.lock`.
 6. **Dry-run on real data, show the numbers, then write with explicit user OK** for
    anything billable/outward-facing — an external write may be visible to a client the
    moment it lands.
@@ -134,31 +148,22 @@ framed as a concrete feature request. Future integrations get easier.
 
 ## Common failure modes
 
-- **Building the whole pipeline on interactive-MCP auth**, then discovering the headless
-  path 401s — step 3 exists to catch this on day one.
-- **Blind re-create on every run** (no state file / no period guard) → duplicate
-  expenses, double comments, repeated sends.
-- **Trusting the write's 200:** a queued send can still be suppressed/undeliverable;
-  always read state back (step 7).
-- **Leaking economics or secrets into outward-facing fields or logs** — notes, debug
-  output, error messages that interpolate a token.
-- **Guessing a money formula** instead of confirming with worked examples on real data.
-- **An automation that can crash its host** — un-caught errors in a hook, foreground
-  blocking, unlogged failures.
 - **Assuming the identifier scheme** (email-as-id, key-independent tokens) — verify the
   provider's actual keying before lookups; error text like "invalid key" can point at
   the wrong credential.
 
 ## Before you call this done
 
-- [ ] Read the service's LEARNINGS/reference entries before building.
-- [ ] Spec confirmed with worked examples; every assumption is a config knob.
 - [ ] The SHIPPED auth path proven with a real call (not just the MCP session).
 - [ ] Writes are idempotent: state file + once-per-period guard + lock-semantics handling.
-- [ ] No secret or internal economics in any outward-facing field, log, or transcript.
-- [ ] Dry-run shown; outward/billable writes made only with explicit user OK.
 - [ ] Result verified through a second channel (read-back), not just the write's response.
-- [ ] New quirks recorded per the protocol below.
+
+## Reference files for specific jobs
+
+| The integration | Read first |
+| --- | --- |
+| Subscription billing: failed payments, dunning, billing webhooks, lifecycle emails, cancellation | [billing-recovery.md](billing-recovery.md) |
+| An app starts sending text messages (auth codes, alerts, or marketing) | [sms-compliance.md](sms-compliance.md) |
 
 ## Related skills
 

@@ -80,11 +80,6 @@ this skill, when your copy keeps one — *Dotfiles pointers*.)
 - Arch-independence: derive brew paths from `$(brew --prefix)`, never hardcode
   `/usr/local` (Intel) vs `/opt/homebrew` (Apple Silicon). In `install.sh`, after
   installing brew, `eval "$($(…)/brew shellenv)"` to get it on PATH for that arch.
-- Modern shell wiring: `fzf --zsh` replaces the old hardcoded `.fzf.zsh` (fzf ≥0.48);
-  the zinit org is `zdharma-continuum` (old `zdharma` is abandoned/hijacked); `git.io`
-  short URLs are dead (sunset 2022); installing binaries through Go's `get` subcommand was
-  removed in Go 1.18 → use its `install` subcommand with a version suffix instead.
-- An **empty `else` clause is a syntax error** in bash/zsh (`if …; then …; else\n\nfi`).
 - **A PATH prepend in `~/.zshenv` does NOT survive login-shell init on macOS:**
   `/etc/zprofile` runs `path_helper` after `.zshenv`, moving system dirs
   (`/usr/local/bin` etc.) back to the front. Anything that must stay first (e.g. the nvm

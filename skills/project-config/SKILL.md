@@ -1,5 +1,6 @@
 ---
 name: project-config
+category: Workflow
 description: >
   The recorded facts of how each project runs: node version, env and direnv, package manager,
   monorepo layout, and the exact install, run, build, test, lint and migrate commands. Consult

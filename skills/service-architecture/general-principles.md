@@ -6,6 +6,12 @@ copy keeps one — *general-principles examples*.
 
 ## Preferred patterns (general)
 
+- **Every command, job and backfill is idempotent by design.** Ask three questions of
+  it: what happens if it runs twice, what if the last run died halfway, and does a
+  rerun converge on the same end state? Write to a temp path and rename, upsert rather
+  than insert, and key every external side effect (an email, a charge) on an
+  idempotency key. (Adapted 2026-10-17 from pstack's
+  `principle-make-operations-idempotent`, MIT.)
 - **Smart endpoint / composite auth:** one endpoint serves multiple caller types via a
   single guard that evaluates tiers in a fixed order and short-circuits on the first pass:
   internal admin → partner admin (scoped to a partner that owns the target) → SP

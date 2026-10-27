@@ -11,10 +11,13 @@ and update** them — but **produce a report and confirm before mutating anythin
 
 1. **Scope.** Ask or infer: all of the user's open tickets, a project, a label, a date
    range? Default to the user's open (non-done) tickets in the project, newest first.
-2. **Fetch** the tickets (Jira: `searchJiraIssuesUsingJql`) with **minimal fields**
-   (`summary, status, issuetype, labels, created, updated, assignee`) — including
-   `description` in a broad scan blows the token budget on busy projects. Pull full
-   detail (description + comments) only for real candidates, with `getJiraIssue`.
+2. **Fetch** the tickets with **minimal fields** (`summary, status, issuetype, labels,
+   created, updated, assignee`) — including `description` in a broad scan blows the token
+   budget on busy projects. Pull full detail (description + comments) only for real
+   candidates. With a tracker CLI (`LOCAL.md` beside this skill, when your copy keeps one),
+   its list and get commands do both, and a scope its list cannot express (a label, a date
+   range, a text search) falls back to the connector's search. Without one, on Jira:
+   `searchJiraIssuesUsingJql`, then `getJiraIssue`.
 3. **Classify each ticket** with evidence:
    - **Already implemented?** Cross-check against the codebase (search for the
      feature/files, check merged PRs, commits, branches, closed related tickets) and
@@ -40,7 +43,9 @@ and update** them — but **produce a report and confirm before mutating anythin
 
    For anything you're not confident about, say so and **ask** rather than asserting.
 5. **On the user's confirmation**, apply the approved changes. Prefer non-destructive
-   first:
+   first. Each change below goes through the tracker CLI where `LOCAL.md` gives its
+   command; the Jira connector tools named are the route without one, and for any verb
+   the CLI lacks:
    - **Link** related/duplicate tickets (`getIssueLinkTypes` then `createIssueLink`;
      use "Duplicate" / "Relates" / "Blocks" as appropriate).
    - **Comment** with the evidence/rationale (`addCommentToJiraIssue`) so the trail is

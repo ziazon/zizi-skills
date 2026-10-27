@@ -57,8 +57,20 @@ own commits.
 For a program that ships as many small dependent/independent PRs off one worktree:
 
 - **Move an INDEPENDENT slice onto its own main-based branch** (don't pile it onto
-  the current feature branch): `git stash push -u` → `git checkout -b <new> origin/main`
-  → `git stash pop` → commit. Keeps each PR independent + reviewable. Use this when the
+  the current feature branch). The stash stack is shared by every worktree and session
+  of the repo, so never a bare `git stash pop`: it applies whatever entry is on top,
+  which may be another session's. Tag the entry and apply it by SHA:
+
+  ```sh
+  git stash push -u -m "slice-<unique-tag>"
+  sha=$(git stash list --format='%H %gs' | awk '/slice-<unique-tag>/{print $1; exit}')
+  git checkout -b <new> origin/main
+  git stash apply "$sha"        # then commit
+  ref=$(git stash list --format='%gd %gs' | awk '/slice-<unique-tag>/{print $1; exit}')
+  git stash drop "$ref"         # re-found by tag: its stash@{n} may have moved
+  ```
+
+  Keeps each PR independent + reviewable. Use this when the
   next slice doesn't actually depend on the current branch's commits.
 - **A stacked PR auto-heals when its base merges.** Branch B based on branch A (a PR);
   A merges to main and its remote branch is deleted. `gh pr create --base A` then fails

@@ -1,5 +1,6 @@
 ---
 name: plain-language
+category: Writing & research
 description: >
   Clear, friendly, jargon-free writing for non-technical readers: ticket text, QA steps, release
   notes, status updates, UI copy, business messages. Use when writing for QA, product,
@@ -21,10 +22,7 @@ are trying to do with it. Write to that person.
 
 ## Core principles
 
-1. **Lead with the point.** First sentence says what this is and why it matters to the
-   reader. No throat-clearing, no "this PR refactors…". Reader should never have to dig
-   for the takeaway.
-2. **Plain words over jargon.** Replace engineering terms with what the user *sees* or
+1. **Plain words over jargon.** Replace engineering terms with what the user *sees* or
    *does*. Translate, don't transliterate:
    - "endpoint / API returns 403" → "the page shows a 'not allowed' error"
    - "null state / empty array" → "when there's nothing to show yet"
@@ -33,20 +31,6 @@ are trying to do with it. Write to that person.
    - "the modal renders" → "a pop-up window opens"
    - "VIN-routed update" → name the actual user action instead
    When a technical term is genuinely needed, define it in one short aside.
-3. **Concrete, not abstract.** Name the screen, the button, the field, the user role.
-   "Click **Save** on the Business Profile page," not "submit the form."
-4. **Short sentences, active voice.** One idea per sentence. "You'll see a green
-   banner," not "a green banner will be displayed to the user."
-5. **Structure for scanning.** Short paragraphs, headings, numbered steps for anything
-   sequential, bullets for lists. A wall of text loses people.
-6. **Engaging, not stiff.** Warm and direct, like a helpful colleague. A little
-   personality is good; corporate filler ("in order to facilitate") is not. Never
-   sacrifice clarity for cleverness.
-7. **Accurate above all.** Plain ≠ vague. Don't round off the meaning to make it
-   simpler. If a detail matters for the reader to act correctly, keep it — just say it
-   plainly. When simplifying would mislead, keep the precise version.
-8. **Respect the reader's time.** Cut every word that doesn't earn its place. If a
-   sentence can go without losing meaning, cut it.
 
 ## A quick method
 
@@ -63,6 +47,10 @@ When asked to write or rewrite copy:
 5. **Tighten pass:** cut filler, split long sentences, switch passive→active.
 6. **Engagement check:** would a busy non-engineer keep reading? Is the opener
    compelling? Is the tone friendly, not robotic?
+
+Editing copy that already exists (a page, UI copy, an email, a published article to refresh)?
+Use [copy-sweep.md](copy-sweep.md): it picks the mode first (point edit, keep the voice, or
+rewrite from the record), then runs the sweeps in order.
 
 ## Titles specifically
 
@@ -89,17 +77,8 @@ one — *Title examples*.)
 
 ## Common failure modes — if you're about to do one of these, stop
 
-- **Shipping untranslated jargon** ("endpoint", "modal", "403", "persisted", a file
-  path, a function name) in reader-facing copy — check the glossary in LEARNINGS.md;
-  if a term has no plain equivalent, say so and ask rather than guessing.
-- **Rounding off the meaning to sound simpler.** Plain ≠ vague; if the simplification
-  would make the reader act incorrectly, keep the precise version and say it plainly.
-- **Burying engineer detail in the reader-facing body.** It belongs in a separate
-  "Technical notes" aside so the plain part stays plain.
 - **Describing third-party services by function** ("our payment processor") — reference
   them by brand name (Stripe, Lyft); brand names are clearer to non-technical readers.
-- **Over-producing.** A title is one line; a status update is a few sentences. Match
-  the requested format and length — extra prose costs the reader time.
 
 ## Before you call this done
 
@@ -117,6 +96,7 @@ one — *Title examples*.)
 - [project-manager](../project-manager/SKILL.md): ticket titles, descriptions and QA steps are written in this voice.
 - [status-update](../status-update/SKILL.md): a status report is a dashboard plus a short TLDR; this skill owns the TLDR's wording.
 - [frontend](../frontend/SKILL.md): UI copy (labels, empty, loading and error states) is written here and placed there.
+- [marketing](../marketing/SKILL.md): it decides what a landing, pricing or signup page must get the reader to do and which true evidence it may claim; this skill writes the words.
 
 ## Capturing the user's voice (session-handoff protocol)
 

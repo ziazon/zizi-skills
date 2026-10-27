@@ -8,6 +8,17 @@ Apparently-dead is not dead. Before deleting, you must actively rule out every
 non-obvious form of use below. **The default answer to "is this safe to delete?"
 is "prove it first."**
 
+## Contents
+
+- Step 0 — establish a green baseline before touching anything
+- Step 1 — search exhaustively, across the whole stack
+- Step 2 — rule out non-obvious "use"
+- Step 3 — lean on tooling, then verify
+- Prefer the smallest safe reduction
+- Step 4 — when uncertain, don't delete
+- Consumer-bounded removal (when the user names the complete consumer set)
+- Output when asked to "remove dead code"
+
 ## Step 0 — establish a green baseline before touching anything
 
 Run the relevant build / type-check / lint / tests FIRST and confirm they pass

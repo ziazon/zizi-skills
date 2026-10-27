@@ -1,5 +1,6 @@
 ---
 name: explain
+category: Workflow
 description: Re-explain the last message in plain words, using the project's own vocabulary.
 argument-hint: "the part that didn't land (optional)"
 disable-model-invocation: true

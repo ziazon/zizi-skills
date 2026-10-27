@@ -1,5 +1,6 @@
 ---
 name: service-architecture
+category: Engineering
 description: >
   Backend architecture decisions: service boundaries, splitting vs consolidating, inter-service
   calls, auth guards and tiers, where logic lives, strangler migrations. Load before adding or
@@ -46,8 +47,6 @@ The patterns behind each step, with their caveats:
 
 ## Common failure modes
 
-- **Inventing a parallel stack for a solved problem** — a new guard, filter shape or
-  helper when the codebase already has one. Step 1 exists to prevent exactly this.
 - **Mutating an existing endpoint's auth/shape in place** instead of adding a sibling
   version and migrating the consumer (Hyrum's Law: every observable behavior becomes a
   contract someone depends on).
@@ -55,14 +54,12 @@ The patterns behind each step, with their caveats:
   a field the old guard set; a pass/fail-only replacement silently opens an authz hole.
 - **An auth decorator without its guard is inert** — metadata does nothing until a guard
   reads it, so the route is silently OPEN.
-- **Gating access but not authority** — clamp grantable levels in the service.
 - **Fanning out one external API call per list row** — keep a synced read model for
   sortable/filterable columns and refresh only the visible page on demand.
 - **Building a parallel admin UI** when the same permission-gated screens can serve both
   audiences — then failing to verify the lower tier can't reach the privileged actions.
 - **Stampeding boot-time tasks** — gate them (advisory lock + change detection) so N
   instances booting don't all write.
-- **Declaring DI wiring done on green unit tests** — see step 6.
 
 ## Related skills
 

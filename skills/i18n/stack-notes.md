@@ -5,6 +5,16 @@ the source at plan time (see [source-driven-development](../source-driven-develo
 Versions below were read from the npm registry on 2026-10-12. The nestjs-i18n behaviour
 was read from its shipped 10.8.5 code.
 
+## Contents
+
+- Message syntax per stack
+- Any stack: translation packs as JSON
+- Vue 3 + Vite (incl. SSR)
+- NestJS API
+- Go services
+- PostgreSQL
+- R / Shiny and other server-templated apps
+
 ## Message syntax per stack
 
 The completeness gate needs one parser per syntax (SKILL.md §3, items 3–4). If packs are
@@ -25,10 +35,25 @@ shared across stacks, pick one source syntax and compile it into each.
 - **Propagating a new key:** use an **order-preserving** script that inserts the key at
   the same position in every file, so review diffs line up. Write the value as a marked
   draft (`"⟦TODO⟧ English text"`) that the gate's untranslated check rejects. Never
-  hand-edit every pack.
+  hand-edit every pack. Run exactly this (same registry and `{locale}` template as the gate):
+
+  ```sh
+  node <skill-dir>/scripts/add-key.mjs --registry <registry.json> --packs '<dir>/{locale}.json' \
+    --key <dotted.key> --text "<source text>" [--after <sibling.key> | --first] [--dry-run]
+  ```
+
+  Without `--after`/`--first` the key goes last in its parent. Nothing is written unless every
+  pack can take it (each file is replaced atomically, but a failure partway through the
+  renames leaves the earlier packs written: rerun on the rest by hand). Exit 0 written; 2 usage, a bad registry, an unreadable or malformed pack, or `--after`
+  absent from the source pack (or in another parent), or a parent whose integer-like keys (`"1"`, `"20"`)
+  JavaScript would reorder; 3 the key already exists, or collides with a string, in
+  some pack; 4 a pack whose formatting a JSON round trip would change (named): edit that one by
+  hand. A `WARN … --after … missing` line means that pack was out of parity, and the key went
+  last in its parent there. Then run the gate: check 5 lists every draft still to translate.
 - **Translator metadata** goes in a sidecar (`locales/_meta.json`), because JSON has no
   comments. Per key: `description`, `maxLength`, a screenshot link and, if you use the
-  staleness policy, `sourceHash`. The gate reads `maxLength` and `sourceHash`.
+  staleness policy, `sourceHash`. `i18n-gate.mjs --meta` reads `maxLength` (check 7); it
+  does not check `sourceHash` yet, so a staleness policy needs its own step.
 
 ## Vue 3 + Vite (incl. SSR)
 

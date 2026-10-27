@@ -1,5 +1,6 @@
 ---
 name: code-quality
+category: Engineering
 description: >
   Standards for reviewing and cleaning up code. Use when reviewing any diff (your own before
   commit, a Codex or sub-agent diff, a colleague's PR) or when asked to clean up, de-duplicate
@@ -42,12 +43,6 @@ and a brief to an implementing agent names all three.
      The number prompts the look; the one-reason-to-change test decides.
 2. **Readable by a junior engineer.** A junior engineer can follow the functional flow
    without asking anyone. The flow is clean, simple and consistent.
-   - Names say what a thing is or does; booleans read as predicates; no
-     abbreviations the codebase doesn't already use; avoid `data`/`tmp`/`handle`.
-   - Clarity over cleverness: the obvious form; extract a name for a confusing
-     expression rather than explaining it in a comment; early returns and guards
-     over nesting.
-   - One level of abstraction per function, so the flow reads top to bottom.
 3. **One rhythm per kind of work.** The same kind of work (an endpoint, a screen, a
    job, a form) moves data through the same stages, in the same order, with the same
    names and the same error and loading shape, everywhere in the codebase. Someone
@@ -83,14 +78,16 @@ layout all follow local idiom; don't introduce a style island.
   factories, registries or flag parameters for single-use code; no "flexibility"
   that wasn't requested; no error handling for scenarios that cannot occur.
   Mirroring the established flow is not speculation (hard rule 3).
+- **Reach for what exists before writing new**, in this order: a helper or component
+  the repo already has, a standard-library or platform feature (`structuredClone`, a
+  native `<input type="date">`), a dependency already installed, and only then the
+  minimum new code.
 - **Clean up your own orphans — and only yours:** remove the imports, variables,
   and functions that YOUR change made unused. Pre-existing dead code stays in an
   unrelated diff — flag it for a separate pass under the deletion discipline
   below rather than bundling its removal.
 - **Scope litmus: every changed line traces directly to the request.** A line you
   can't tie to the task belongs in a separate commit or not in the diff at all.
-  (This and the two bullets above adapted 2026-08-27 from the Karpathy-derived
-  `CLAUDE.md` template, `multica-ai/andrej-karpathy-skills`.)
 - **Scope discipline:** a quality pass is behavior-preserving. If a cleanup
   changes behavior, surface it separately rather than smuggling it in.
 - **Change sizing:** ~100 changed lines is good, ~300 acceptable for one logical
@@ -184,6 +181,26 @@ Your own before commit, a delegated agent's, or a colleague's — the same pass.
 - **A finding is a property of the code in front of you.** Cross-repo merge order
   and release sequencing are not findings; how the code behaves when a dependency is
   missing is.
+- **A special case bolted onto a busy flow is Required.** A one-off boolean, nullable
+  mode or special-case branch added to an existing shared path, or one feature check
+  scattered across shared code, belongs behind its own seam. So does an `any`, a cast
+  or a silent fallback that exists only to quiet the compiler: it hides an invariant
+  the types should state.
+- **Type the invariant.** A `switch` over a union or enum ends in an exhaustive
+  `never` check (or the repo's exhaustiveness lint), so a new variant fails to
+  compile until it is handled. Prefer a discriminated union to a bag of optional
+  fields, and parse external data once, at the boundary.
+- **Name the devex break.** A changed secret source, a renamed or new env var, a
+  remapped port or a newly required script is a Required finding that names the
+  migration step. For flag-gated work, confirm the flag-off path is unchanged and grep
+  the new symbol for use on ungated paths.
+- **Independent async work runs concurrently; a multi-step update cannot half-apply.**
+  Flag needlessly sequential awaits, and a write sequence that leaves state
+  inconsistent when a middle step fails, where the clean shape is obvious.
+- **Name the one fact the change is safe because of,** then prove it by running
+  something (a test that fails without it, a repro, a query) or report it as
+  unproven. The rungs, weakest first: said so, pointed at the line, showed the bad case
+  cannot occur, ran it, reproduced it in the running app.
 
 ### The spec pass — the second axis
 
@@ -228,6 +245,10 @@ Whether a finding comes from a tool, a review subagent, another reviewer, or you
 read — **confirm it against the exact code before you change anything.** Automated and AI
 reviewers over-report; acting blindly churns or breaks correct code.
 
+- **Do your own pass before reading other reviewers.** Read bot and colleague comments
+  after your audit, so they cannot anchor it; then fold in the ones you confirm, with
+  attribution. Don't report a hazard the branch introduces on purpose unless its author
+  is likely underweighting it.
 - **Read the precise code path** the finding names. Many "bugs" dissolve on reading (the
   framework already does the thing, the value is already neutralized upstream, the branch is
   unreachable).
@@ -307,11 +328,26 @@ originating PR*.)
   the user's call, made explicitly.
 - **Draft in-session and get approval before posting.** The user revises wording;
   posting happens on an explicit go, not on your read of "this looks ready."
-- **Mechanically:** one `gh api repos/<owner>/<repo>/pulls/<n>/reviews --method
-  POST --input <file>` call with a `comments` array. Validate the JSON and
-  confirm every anchor's exact line span against the head SHA first
-  (`git show <ref>:<path> | sed -n '<a>,<b>p'`) — one bad span rejects the entire
-  review, not just that comment.
+- **Mechanically, run exactly this** (paths relative to this skill's directory), dry
+  run first, then the approved post:
+
+  ```sh
+  bash scripts/post-review.sh <owner>/<repo> <pr> review.json          # validates, posts nothing
+  bash scripts/post-review.sh <owner>/<repo> <pr> review.json --post   # after the user's explicit go
+  ```
+
+  `review.json` is `{"body": "…", "comments": [{"path", "line", "side"?, "start_line"?,
+  "start_side"?, "body"}]}`. The review `body` is required and non-empty (a one-line
+  summary is enough when every point is on a line), and any other key exits 2. The script checks every anchor lies inside one of the PR's
+  diff hunks at the current head (GitHub rejects the WHOLE review with 422 when one
+  line is outside them), sets `commit_id`, refuses any `event` but `COMMENT`, posts
+  once, and reads the comments back. Exit 0 ok, 2 bad input, 3 an anchor outside the
+  diff, or in a file GitHub returns without a patch (binary or too large) (every one
+  listed; nothing posted), 4 `jq` or `gh` missing, 5 a GitHub call
+  failed or the head moved (never retried: a retry can double-post), 6 posted but
+  fewer comments read back. Still confirm each anchor's wording against the code
+  (`git show <ref>:<path> | sed -n '<a>,<b>p'`): the script proves the line is in the
+  diff, not that it is the line you meant.
 - **Verify across repo boundaries before asserting or asking.** On that PR an open
   question ("does the sibling service validate the hash?") and a standing nit both
   dissolved once the sibling repo was actually read. A question you could have
@@ -320,13 +356,6 @@ originating PR*.)
 
 ## Dependency upgrades
 
-- **Read the changelog, not the version number** — a "patch" can carry a
-  behavior change; for a major, read the migration notes.
-- **One dependency per change** — a bulk bump hides which package broke the build.
-- **Verify a green suite before AND after.** Thin coverage around the dep is
-  itself the finding — add a test first.
-- **Review the lockfile diff, not just the manifest**, and never hand-edit the
-  lockfile.
 - **Pre-add gate:** does the existing stack already solve it / size / maintenance
   / audit / license.
 
@@ -353,11 +382,6 @@ originating PR*.)
 ## Capturing learnings (session-handoff protocol)
 
 Accumulate durable, project-specific quality knowledge in `LEARNINGS.md` beside this
-skill, when your copy keeps one:
-style conventions adopted, dead-code false-positive traps hit in THIS codebase
-(specific reflection/dynamic-dispatch patterns), which detectors work per stack,
-and cross-repo consumer relationships worth remembering. On handoff / "update
-skills" / after a cleanup: dedupe, merge, tag by stack/project, extract the
-general principle. Read it before quality or dead-code work.
+skill, when your copy keeps one. Read it before quality or dead-code work.
 
-<!-- Module-design tests, the fixed-point pre-flight and the separate spec axis are adapted from mattpocock/skills `codebase-design` and `code-review` (MIT, (c) 2026 Matt Pocock); the deep-module idea is John Ousterhout's, A Philosophy of Software Design. -->
+<!-- Module-design tests, the fixed-point pre-flight and the separate spec axis are adapted from mattpocock/skills `codebase-design` and `code-review` (MIT, (c) 2026 Matt Pocock); the deep-module idea is John Ousterhout's, A Philosophy of Software Design. "Reach for what exists" adapted 2026-10-17 from `DietrichGebert/ponytail` (MIT). "No speculative mechanism", "Clean up your own orphans" and "Scope litmus" adapted 2026-08-27 from the Karpathy-derived `CLAUDE.md` template, `multica-ai/andrej-karpathy-skills`. The five review bullets from "A special case bolted onto a busy flow" through "Name the one fact" adapted 2026-10-17 from cursor/plugins' `thermo-nuclear-code-quality-review` and pstack's `blast-radius` (both MIT). -->

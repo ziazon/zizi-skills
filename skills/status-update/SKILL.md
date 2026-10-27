@@ -1,5 +1,6 @@
 ---
 name: status-update
+category: Workflow
 description: >
   Session status as a visual dashboard plus a 2-3 line TLDR, never prose alone. Use on
   /status-update, "where are we", "what's left", mid-way through a multi-item run, and at any
@@ -68,6 +69,16 @@ decisions (this install's: `LOCAL.md` beside this skill, when your copy keeps on
 *Queue record*).
 Round every number; only state what you verified.
 
+**Include each session's state** whenever the dashboard covers sessions,
+lanes or scheduled runs: read it live from the control room's status feed
+(working, thinking, waiting on you, rate-limited, idle, hung, gone, with the
+card each holds and the time in state). Give every session row its state and
+time in state, and put each waiting-on-you or hung session in the
+waiting-on-you box. A machine whose feed is stale shows its sessions as "last
+seen", never as live; an empty feed means nothing is reporting yet, so say so
+rather than inferring states from memory (this install's feed: `LOCAL.md`
+beside this skill, when your copy keeps one — *Session state*).
+
 ## Scope the dashboard to the ask
 
 - "full status" / end-of-batch rollup → the complete board (all workstreams,
@@ -82,23 +93,11 @@ Round every number; only state what you verified.
 When the dashboard renders as a visualize widget, follow its design system;
 these are hard rules, not taste:
 
-- Call `read_me` once per session before the first widget — silently.
-- Open with a visually-hidden `<h2 class="sr-only">` one-sentence summary.
-- **Metric cards** row (`repeat(auto-fit, minmax(150px,1fr))`, `gap:12px`)
-  for the 3-5 numbers that matter; `var(--surface-1)`, 13px muted label,
-  24px/500 value. **Workstream cards** on `var(--surface-2)` with a status
-  pill (`--bg-success`/`--text-success` done, `--bg-accent`/`--text-accent`
-  in progress). **A "waiting on you" box** (`--bg-warning`/`--text-warning`)
+- Call `visualize:read_me` once per session before the first widget — silently.
+- **A "waiting on you" box** (`--bg-warning`/`--text-warning`)
   enumerating every open decision — numbered, never collapsed to a count.
 - Before/after wins render as `old` (struck, `--text-danger`) →
   `≈new` (`--text-success`) with a `ti-arrow-right` between.
-- CSS variables only for color — every color must work in light AND dark
-  mode; never hardcode hex. Tabler **outline** icons only
-  (`<i class="ti ti-NAME" aria-hidden="true">`, no `-filled`). Font weights
-  400/500 only; sentence case; no emoji inside the widget, no gradients or
-  shadows. No `position: fixed`, no font-size below 11px, no tables inside
-  the widget (styled row/card lists instead); container is ~680px wide, so
-  use responsive `auto-fit` grids.
 
 ## When NOT to use
 

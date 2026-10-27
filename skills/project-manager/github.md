@@ -1,7 +1,10 @@
 # GitHub Issues and Projects backend
 
 The `gh` CLI is the whole backend: issues, sub-issues, blocking links and Projects
-(v2) boards all have first-class commands. Every mode in [SKILL.md](SKILL.md) works the
+(v2) boards all have first-class commands. Where your install has a tracker CLI that
+covers the project's board (`LOCAL.md` beside this skill, when your copy keeps one), its
+commands replace the `gh` reads and writes below that it has verbs for; `LOCAL.md` names
+the ones that stay on `gh`. Every mode in [SKILL.md](SKILL.md) works the
 same way here; this file is only the GitHub mechanics. The approval gate is unchanged:
 draft every write and ask before running it.
 

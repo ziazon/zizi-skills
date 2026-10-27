@@ -1,5 +1,6 @@
 ---
 name: frontend
+category: Engineering
 description: >
   Frontend structure and behavior: components, state, a typed service layer, lists, tables and
   filters, forms, modals, loading/empty/error states, routing, SSR, web performance. Use when
@@ -24,6 +25,8 @@ wrong-or-no file is how established conventions get reinvented badly:
 | Any list/table view — building, altering, or filtering one | The project's list/table reference — the shared table/list component's rules, operator filtering, row actions, async list states |
 | A new service/endpoint wire-up, types/enums, stores, persistence, routing/nav, legacy-UI migration | The project's architecture reference — service layer, shared-types traps, the storage helper, route/nav conventions |
 | Public pages, SEO, or anything server-rendered | The project's SSR/public-pages reference — SSR foundation, client-only libs, the SPA-vs-SSR local-testing split |
+| A new public page, robots.txt / sitemap / structured data, or a site launch | [public-site-checklist.md](public-site-checklist.md) — the new-page checks, site-wide crawl and JSON-LD rules, the AI-crawler split, launch day and the week after |
+| A form, signup flow, popup, overlay or modal's behavior | [forms-and-overlays.md](forms-and-overlays.md) — field and validation rules, signup specifics, overlay triggers and dismissal, dialog accessibility |
 | Field placement, permissions/edit surfaces, modal-vs-page, icons, maps, taste | The project's UI/UX reference — includes the light+dark verification rule |
 | Performance / Lighthouse / SEO scores | [web-performance.md](web-performance.md) — `scripts/lh-audit.sh` + the ordered remediation playbook |
 | A stack other than the primary Vue 3 + Tabler one (e.g. R/Shiny) | [other-stacks.md](other-stacks.md) |
@@ -45,13 +48,6 @@ a hand-rolled localStorage helper, a bespoke table) is a review reject even when
 
 ## Step 3 — structure the change
 
-- **Layered data access:** API calls in a typed service class, state in stores,
-  components thin — raw HTTP in a component leaks untyped, untestable coupling.
-- **Reusable, prop-driven components:** one component parameterized by props (e.g. an
-  add/edit modal switched by an optional id) over near-duplicates, so fixes land once.
-- **Performance:** lazy-load heavy/rare views, code-split by route, keep large lists
-  paginated/virtualized, memoize derived data, and watch bundle size when adding a
-  library — each avoids shipping cost to every user for a minority feature.
 - **UX:** loading, empty, AND error states for every async surface (the error branch is
   the one that gets forgotten — see the data-tables file); inline validation feedback;
   don't block the whole view on one slow call.

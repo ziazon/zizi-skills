@@ -1,5 +1,6 @@
 ---
 name: git-sync
+category: Workflow
 description: >
   The standing git workflow. Use at the start of any branch work and before every commit, push,
   rebase or PR: your own branch (never main), rebased on current main, every branch pushed, PR
@@ -72,6 +73,13 @@ Defaults chosen by the user (apply automatically, no pausing):
    on a suite that will never start. (Which repos behave this way here: `LOCAL.md`
    beside this skill, when your copy keeps one — *Docs-only PRs trigger no
    checks*.)
+   **Classify each red check before fixing it:** PR-caused, flaky or infra,
+   unrelated (red on the base too), or needs a decision. Check the base before
+   blaming the PR: if the same job is red on the base, or `git log <PR base
+   sha>..origin/<base>` shows the cause landing there, it is not yours to fix in
+   this PR. Rerun a flaky job once, only when `gh run view <id> --json attempt`
+   says attempt 1 (`gh run rerun <id> --failed`); a second red is a real failure.
+   (Adapted 2026-10-17 from PostHog's ci-shepherd.)
 
 ## Working inside a worktree
 
@@ -140,18 +148,12 @@ continued existence are all assumptions that quietly fail.
    git push --force-with-lease origin <branch>
    ```
 
-   `--force-with-lease`, never `--force`: it refuses if origin moved underneath
-   you (a concurrent session), surfacing the conflict instead of clobbering it.
-
 6. **Prune local branches whose remote is gone.** Remotes are deleted on PR
    merge, so a missing upstream means merged-and-done:
 
-   ```sh
-   git fetch --prune
-   git branch -vv | grep ': gone]' → git branch -D <branch>
-   ```
-
-   Only delete a branch you are not currently on; switch away first if needed.
+   Run the auto-prune sweep under *End-of-work / handoff / archive sweep* below, exactly as
+   written; it holds the only deletion commands. Only delete a branch you are not
+   currently on; switch away first if needed.
 
 ## Procedure at a glance
 
@@ -185,10 +187,12 @@ up. Clean as you go, the same session the PR merges:
 ```sh
 git fetch --prune
 git worktree remove <path-of-the-merged-branch's-worktree>   # if it had one; plain remove refuses if dirty
-git branch -vv | grep ': gone]'          # branches whose remote was deleted
-git branch -D <those branches>           # also delete branches merged via squash/rebase (no ': gone')
 git worktree prune                        # drop admin refs for already-removed dirs
 ```
+
+Then delete the branches with the auto-prune sweep below, never with a hand-typed
+`git branch -D`: a branch with neither a `: gone]` upstream nor a `--merged` proof
+has no evidence it landed, and `-D` deletes unmerged work without asking.
 
 Worktree removal deletes a full `node_modules` (~30-60s on a 5.5k-file repo) — run
 a multi-worktree removal in the background (see `LEARNINGS.md` beside this skill,
@@ -224,24 +228,33 @@ Cleanup is not "on request" — accumulation (dozens of `: gone]` branches, orph
 worktrees) is the failure this skill exists to prevent. Run this sweep at the end
 of a task, at every handoff, and before `archive_session`. Two tiers:
 
-**Auto-prune the provably-safe set (no confirmation).** Two categories of dead
-branch — both must be swept, because they accumulate through different holes:
+**Auto-prune the provably-safe set (no confirmation).** When your install ships the
+sweep script (the *Automated backstop* below; `LOCAL.md` beside this skill names it,
+when your copy keeps one), run exactly that for the current repo, dry run first, then
+`--apply`: it implements every gate in this section, tested. The commands below are
+the manual fallback for an install without it. Two categories of dead branch — both
+must be swept, because they accumulate through different holes:
 
 ```sh
 git fetch --prune
-# (a) UPSTREAM-GONE: branches whose remote was deleted on merge. EXCEPT the
-#     checked-out branch (branch -D refuses branches held by a worktree — the guard).
+# (a) UPSTREAM-GONE: branches whose remote was deleted on merge. EXCEPT protected
+#     long-lived names (a "[gone]" release branch can carry hundreds of commits) and
+#     the checked-out branch (branch -D refuses branches held by a worktree — the guard).
 git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads \
   | awk '$2=="[gone]"{print $1}' | grep -v '^worktree-agent-' \
+  | grep -Ev '^(main|master|develop|trunk|release|staging.*|production.*|prod)$' \
   | while read -r b; do git branch -D "$b"; done
 # (b) MERGED LOCAL-ONLY: branches with NO upstream that are fully merged into
-#     origin/main — never-pushed feature branches AND orphaned worktree-agent-*
-#     whose worktree was removed. --merged origin/main proves zero unmerged commits;
+#     the base — never-pushed feature branches AND orphaned worktree-agent-*
+#     whose worktree was removed. --merged "$base" proves zero unmerged commits;
 #     -d (not -D) double-checks and refuses anything not merged; a branch a live
 #     worktree still holds is refused too. Both are the safety net, so this can't
-#     eat unpushed work (an unpushed plan branch has commits ahead of main → excluded).
-git branch --merged origin/main --format='%(refname:short) %(upstream)' \
-  | awk '$1=="main"{next} $2==""{print $1}' \
+#     eat unpushed work (an unpushed plan branch has commits ahead of base → excluded).
+#     The base comes from origin/HEAD: a hardcoded origin/main silently skips this
+#     clause in develop-based repos.
+base=$(git symbolic-ref --short refs/remotes/origin/HEAD)   # e.g. origin/main
+git branch --merged "$base" --format='%(refname:short) %(upstream)' \
+  | awk -v b="${base#origin/}" '$1==b{next} $2==""{print $1}' \
   | while read -r b; do git branch -d "$b"; done
 # remove CLEAN worktrees whose branch is merged (background; plain remove)
 git worktree prune
@@ -283,32 +296,29 @@ bash <path>/sweep-worktrees.sh --apply      # act
 tail -40 <log-dir>/sweep-worktrees.log      # what the weekly run did
 ```
 
-🔑 **Why the old hook's "never remove a worktree" exemption was the bug, not the
-safety feature it looked like.** A worktree PINS its branch — `git branch -D`
+🔑 A worktree PINS its branch — `git branch -D`
 refuses a branch checked out anywhere — so declining to remove worktrees made
-the branch prune a no-op for exactly the branches that mattered. One audit found
-**45 worktrees / 65 branches / ~12 GB** across three repos, all downstream of that
-one exemption. The same hook also hardcoded `origin/main`,
-which silently disabled clause (b) in every `develop`-based repo. The sweep now
+the branch prune a no-op for exactly the branches that mattered. The sweep
 derives the base from `origin/HEAD`.
 
 A worktree is removed only if EVERY gate passes; any gate that cannot be
-evaluated resolves to KEEP: not the main checkout · not `--exclude`d · clean
-tree · no session transcript touched within `--idle-hours` (24h default, read
-from `~/.claude/projects/<slug>/*.jsonl` mtime) · branch is `[gone]` or 0 ahead
-of base · no open PR · tip older than `--min-age-days`. Branches checked out in
-any worktree, and branches matching the protected pattern (`main|master|develop|
-release|staging*|production*`, overridable via a protected-list file beside the
-script — this install's path is in `LOCAL.md` beside this skill, when your copy
-keeps one), are never candidates.
+evaluated resolves to KEEP: not the main checkout · not `--exclude`d · not
+detached or unreadable · branch not protected · clean tree · no session transcript
+touched within `--idle-hours` (24h default, read from
+`~/.claude/projects/<slug>/*.jsonl` mtime) · tip older than `--min-age-days` ·
+branch is `[gone]` or 0 ahead of base · no open PR. `--max N` caps removals per
+repo (the session-end hook removes one at a time). Branches checked out in any
+worktree, and branches matching the protected pattern
+(`main|master|develop|trunk|release|staging.*|production.*|prod`, replaced
+wholesale by a protected-list file of one ERE per line — this install's path is in
+`LOCAL.md` beside this skill, when your copy keeps one), are never candidates, in
+either the worktree phase or the branch phase.
 
-⚠️ **`gh` failure must not mean "assume a PR exists."** The first draft failed
-safe that way and was therefore a silent no-op for any repo without a GitHub
-remote — and for every run where gh was offline or unauthenticated. The sweep
-now probes `gh repo view` once per repo: when gh can answer, the per-branch PR
+⚠️ **`gh` failure must not mean "assume a PR exists."** The sweep
+probes `gh repo view` once per repo: when gh can answer, the per-branch PR
 check is authoritative; when it cannot, the PR gate is dropped and branch state
 alone decides, which is already decisive (0-ahead means there are no unique
-commits to lose). A fail-safe that disables the entire job is not a safe default.
+commits to lose).
 
 ## Safety rules / failure modes to catch yourself on
 
@@ -322,8 +332,6 @@ commits to lose). A fail-safe that disables the entire job is not a safe default
   Do not escalate to `--force`.
 - **Linear history only.** Integrate with rebase, never merge commits. Don't
   create merge commits to "catch up" a branch — rebase it.
-- **Rebase conflicts:** resolve, `git rebase --continue`. If it goes sideways,
-  `git rebase --abort` returns you to safety; reassess before retrying.
 - **Don't delete unmerged work.** Prune only branches proven merged (`: gone]`,
   or `--merged origin/main`). A `gone` branch with unpushed local commits you
   don't recognize → stop and flag it rather than `-D`.

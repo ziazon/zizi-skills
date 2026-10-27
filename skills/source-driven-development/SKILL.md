@@ -1,5 +1,6 @@
 ---
 name: source-driven-development
+category: Engineering
 description: >
   Ground implementation decisions in official documentation, with citations. Use when building
   with a framework or library where correctness matters or common patterns may be outdated.
@@ -9,7 +10,7 @@ description: >
 
 ## Overview
 
-Every framework-specific code decision must be backed by official documentation. Don't implement from memory — verify, cite, and let the user see your sources. Training data goes stale, APIs get deprecated, best practices evolve. This skill ensures the user gets code they can trust because every pattern traces back to an authoritative source they can check.
+Every framework-specific code decision must be backed by official documentation. Don't implement from memory — verify, cite, and let the user see your sources.
 
 ## When to Use
 
@@ -39,18 +40,7 @@ DETECT ──→ FETCH ──→ IMPLEMENT ──→ CITE
 
 ### Step 1: Detect Stack and Versions
 
-Read the project's dependency file to identify exact versions:
-
-```
-package.json    → Node/React/Vue/Angular/Svelte
-composer.json   → PHP/Symfony/Laravel
-requirements.txt / pyproject.toml → Python/Django/Flask
-go.mod          → Go
-Cargo.toml      → Rust
-Gemfile         → Ruby/Rails
-```
-
-State what you found explicitly:
+Read the project's dependency file to identify exact versions. State what you found explicitly:
 
 ```
 STACK DETECTED:
@@ -70,17 +60,11 @@ Fetch the specific documentation page for the feature you're implementing. Not t
 
 | Priority | Source | Example |
 |----------|--------|---------|
+| 0 | The installed package itself, at the pinned version | `node_modules/three/src/…`, its `.d.ts` files, its `CHANGELOG.md`; `vendor/`, `site-packages/` |
 | 1 | Official documentation | react.dev, docs.djangoproject.com, symfony.com/doc |
 | 2 | Official blog / changelog | react.dev/blog, nextjs.org/blog |
 | 3 | Web standards references | MDN, web.dev, html.spec.whatwg.org |
 | 4 | Browser/runtime compatibility | caniuse.com, node.green |
-
-**Not authoritative — never cite as primary sources:**
-
-- Stack Overflow answers
-- Blog posts or tutorials (even popular ones)
-- AI-generated documentation or summaries
-- Your own training data (that is the whole point — verify it)
 
 **Be precise with what you fetch:**
 
@@ -91,6 +75,18 @@ GOOD: Fetch react.dev/reference/react/useActionState
 BAD:  Search "django authentication best practices"
 GOOD: Fetch docs.djangoproject.com/en/6.0/topics/auth/
 ```
+
+The installed package is the final word on names and signatures for the version you will ship:
+docs track the latest release, and a version newer than your training is exactly where memory
+fails. Read its types or source first, then the docs for how to use it.
+
+**Keep what you verified.** When a project pins a library newer than most model training (a
+game engine, a fast-moving framework), keep a short note per library in the repo's
+`docs/engine-reference/<library>.md`: the pinned version, the APIs the project actually calls
+with their verified signatures, a "don't use X, use Y" list for anything renamed or removed
+since an older version, the sources, and a "last verified" date. Read it before the docs; update
+it in the same change that bumps the pin. It is a cache of checked facts, so anything in it that
+disagrees with the installed package loses.
 
 After fetching, extract the key patterns and note any deprecation warnings or migration guidance.
 
@@ -152,27 +148,6 @@ Verify before using in production.
 ```
 
 Honesty about what you couldn't verify is more valuable than false confidence.
-
-## Common Rationalizations
-
-| Rationalization | Reality |
-|---|---|
-| "I'm confident about this API" | Confidence is not evidence. Training data contains outdated patterns that look correct but break against current versions. Verify. |
-| "Fetching docs wastes tokens" | Hallucinating an API wastes more. The user debugs for an hour, then discovers the function signature changed. One fetch prevents hours of rework. |
-| "The docs won't have what I need" | If the docs don't cover it, that's valuable information — the pattern may not be officially recommended. |
-| "I'll just mention it might be outdated" | A disclaimer doesn't help. Either verify and cite, or clearly flag it as unverified. Hedging is the worst option. |
-| "This is a simple task, no need to check" | Simple tasks with wrong patterns become templates. The user copies your deprecated form handler into ten components before discovering the modern approach exists. |
-
-## Red Flags
-
-- Writing framework-specific code without checking the docs for that version
-- Using "I believe" or "I think" about an API instead of citing the source
-- Implementing a pattern without knowing which version it applies to
-- Citing Stack Overflow or blog posts instead of official documentation
-- Using deprecated APIs because they appear in training data
-- Not reading `package.json` / dependency files before implementing
-- Delivering code without source citations for framework-specific decisions
-- Fetching an entire docs site when only one page is relevant
 
 ## Verification
 

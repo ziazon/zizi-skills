@@ -1,5 +1,6 @@
 ---
 name: i18n
+category: Engineering
 description: >
   Multi-language support (i18n/l10n). Use when a task touches a translation file or a
   user-facing string in a product that ships more than one language: adding a language or key,
@@ -120,14 +121,28 @@ missing-key and unused-key lints. Write `const STATUS_LABEL: Record<Status, Key>
 (typed against the enum, so a new member fails type-check), or rely on the §3 enum-coverage
 check. Never leave a key reachable only by string building.
 
-**Key naming.** Namespace by feature or surface (`orgDetails.cardGenderTitle`) and
-describe *meaning*, not English wording (`cta.save`, not `saveButtonText`).
-
 ## 3. The completeness gate (CI, from P0, before any string is extracted)
 
 **One language-neutral script** (Node or Python) reads the registry and every pack. It
 runs in **every** service's CI job (UI, API, Go, workers), so no codebase can drift. Each
-stack's syntax needs its own parser for items 3–4 (stack-notes). It fails on:
+stack's syntax needs its own parser for items 3–4 (stack-notes).
+
+For JSON packs (flat or nested), the script exists. Run exactly this (Node 22+, no packages):
+
+```sh
+node <skill-dir>/scripts/i18n-gate.mjs --registry <registry.json> --packs '<dir>/{locale}.json' \
+  [--required-keys <keys.txt>] [--dnt <terms.txt>] [--meta <_meta.json>] [--production]
+node <skill-dir>/scripts/i18n-gate.mjs --self-test    # once per machine: every check goes red
+```
+
+The registry schema is in the script's header. It prints one `FAIL <check> <locale> <key>:
+<reason>` line per failure, numbered as below, then a summary. Exit 0 clean; 1 any failure; 2
+usage, or an unreadable or invalid registry or pack (named). `--required-keys` is how items 9
+and 10 reach it: the project generates the key list from its enums, error codes and content
+items. Its placeholder check is a regex over `{x}`, `{{x}}`, `%{x}`, printf verbs and tags, not
+each stack's parser: keep the stack's own parse step for full item 3. A `WARN … plural
+category check skipped` line means the runtime has no CLDR data for that code (item 4 did not
+run for it). A pack in a non-JSON format still needs its own script. It fails on:
 
 1. **Key parity.** Every locale's flattened key set equals the source pack's. Missing
    *and* extra keys both fail (an extra key is usually a typo of a missing one).
@@ -238,16 +253,7 @@ Machine translation is a draft. Before a locale goes `live`:
 
 ## 8. Layout, RTL, fonts, formatting
 
-- Set `<html lang="…" dir="…">` from the registry on the server for SSR. Use CSS logical
-  properties (`margin-inline-start`, `text-align: start`). Mirror **directional** icons
-  only (arrows, chevrons, "back"), not play buttons, checkmarks or logos. Force LTR on
-  embedded numbers, codes and phone numbers with `dir="ltr"`. Use `<bdi>` around
-  interpolated text whose direction is unknown (a user's name).
-- Fonts: the font stack must cover every script you ship. Set `lang` correctly, because
-  Han characters render with different glyph forms per language and `:lang()` rules key
-  off it.
-- Allow 30–40% text expansion; short labels can double. No fixed-width buttons sized to
-  English.
+- Set `<html lang="…" dir="…">` from the registry on the server for SSR.
 - **Formatting** goes through the locale-aware formatter (`Intl.*` in JS, CLDR-backed
   libraries elsewhere) with the resolved locale passed explicitly. Never build a date
   string by hand. Digit system (Latin vs Arabic-Indic) is a CLDR numbering-system choice;

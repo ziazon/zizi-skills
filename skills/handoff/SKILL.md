@@ -1,5 +1,6 @@
 ---
 name: handoff
+category: Workflow
 description: >
   Durable session handoff with a resume prompt. Use when pausing or ending work at a real
   boundary (a phase or PR done, a blocker, a pivot, a drained queue) or when the user says "hand
@@ -16,12 +17,9 @@ survive — anything not written to memory, a handoff file, or the repo is lost.
 
 ## Write-through, not stop-at-a-threshold
 
-The old rule was "hand off at ~50% context remaining." It's retired. Ending a
-session early is expensive: every session boundary costs the user an action (in
-many harnesses nothing can start a fresh local session unattended — this install's
-resume surfaces are in `LOCAL.md` beside this skill, when your copy keeps one, *Why a
-session boundary costs a click*), so a timer-based handoff spends that action to
-escape a compaction that, done right, costs almost nothing.
+The old "hand off at ~50% context remaining" rule is retired: every session boundary
+costs the user an action (this install's resume surfaces are in `LOCAL.md` beside this
+skill, when your copy keeps one, *Why a session boundary costs a click*).
 
 Compaction is only lossy when the durable state lives in the chat. So keep it out
 of the chat: **write state through to memory / the handoff file / the repo
@@ -219,6 +217,36 @@ must contain, concretely:
   first, not "continue the work". Vague resume points are the #1 handoff failure.
 - Convert relative dates ("yesterday", "next week") to absolute dates.
 
+The record's skeleton, with step 6's Skills Review as its last section:
+
+```markdown
+# Handoff: <task or branch> (<YYYY-MM-DD>)
+
+## Status
+- DONE: <item>, verified by <command or check, and its result>
+- IN PROGRESS: <item>, <exactly where it stands>
+- NOT STARTED: <item>
+
+## Decisions
+- <decision>. Why: <rationale>
+
+## Changes
+Branch `<branch>`; commits `<sha>` <subject>; PRs <link or number>; files <paths>
+
+## Verification
+- Ran `<command>`: <outcome>
+- UNVERIFIED: <what was not tested or run>
+
+## Blockers
+- <blocker>. Unblocked by: <the exact input or event>
+
+## Next action
+<the command or edit to execute first, never "continue the work">
+
+## Skills Review
+- ✅ / ⚠️ / ❌ <skill>: <one-line finding>
+```
+
 ### 3b. Refresh the project-atlas vault note (when the user keeps one)
 
 Some users keep a cross-project atlas — e.g. an Obsidian vault holding one note per
@@ -334,44 +362,20 @@ the session learned but didn't write (dedupe against what's already there; tag
 project-specific items). If this sweep regularly finds much to add, the
 write-through discipline is slipping — fix that, don't grow this step.
 
-**Sweep the transcript, not your context.** A sweep that only looks at what you can
-still see cannot find anything from before a compaction — which in a long session is
-most of it, and is exactly where the write-through discipline was most likely to slip.
+**Sweep the transcript on disk, not your context**, with targeted searches for
+corrections, stated preferences and reversed decisions. Run exactly this (the session id
+is in any scratchpad or task path already in context; extra arguments are regexes):
 
-🚨 **A cross-session transcript-search tool will NOT do this** — where the harness has
-one, it searches *other* sessions, never the one you are in, so pointing the sweep at it
-returns nothing and reads as "no stragglers found." Verified 2026-08-08 (the tool's name:
-`LOCAL.md` beside this skill, when your copy keeps one, *Transcript sweep specifics*).
-Use it for what it is good at (finding which PAST session covered a topic), not for this.
+```bash
+<skill-dir>/scripts/transcript-sweep.sh <sessionId> [extra-regex ...]
+```
 
-The current session's transcript is on disk at
-`~/.claude/projects/<project-slug>/<sessionId>.jsonl`. 🚨 **Do NOT assume that is the
-same directory as the auto-memory files — in a worktree session it is not.** Memory
-lives under the main repo slug; the transcript lives under a worktree-suffixed slug
-(`…-<repo>--claude-worktrees-<name>/`), so a sweep pointed at the memory
-directory greps OTHER sessions and returns nothing for yours — the same silent
-"no stragglers found" failure as the MCP tool, one directory over. Find the file,
-don't derive it: `find ~/.claude/projects -name "<sessionId>.jsonl" -maxdepth 2`
-(the session id is in any scratchpad/task path already in context), or
-`grep -rl "<my-branch-name>" ~/.claude/projects/` when the id isn't handy — then
-confirm the path carries YOUR worktree. Parse it for the high-signal patterns: explicit corrections
-("no, not that", "actually", "that's wrong"), stated preferences, reversed decisions,
-and anything you were told twice. User turns are at `.message.content` — sometimes a
-string, sometimes an array of blocks — and `[SYSTEM …]` notifications are interleaved
-and must be filtered or they dominate every hit.
+(`<skill-dir>` is this skill's base directory, which Claude Code prints when the skill loads).
 
-Targeted searches, not a full re-read — the point is to recover what fell out of
-context, not to re-derive the session.
-
-Anything that spans skills goes to a cross-skill principles file, if you keep one,
-rather than into three `LEARNINGS.md` files (this install's file and rule: `LOCAL.md`
-beside this skill, when your copy keeps one, *Cross-skill principles file*).
-
-(This step replaces what `claude-mem` and `headroom learn` do with a plugin: mine the
-session record instead of relying on the agent having noticed. Both were evaluated
-2026-08-08 and rejected — 60–90s per-tool latency and a cloud sync of private-repo tool
-output respectively. The transcript tool is already installed and nothing leaves the
-machine.)
+It prints the transcript path it found, every genuine user turn that matches, and a
+`<m> of <k> user turns matched` line; a missing transcript is exit 3, never a silent empty
+result. Why the file is found this way and what counts as a user turn:
+[transcript-sweep.md](transcript-sweep.md).
 
 ### 8. Post the resume handoff (when work remains) — route by surface
 
@@ -411,83 +415,10 @@ when the session already knows it (e.g. from a device setting loaded at session 
      surface is user-only, don't try to invoke it — the deliverable is the prompt
      text, ready to copy. Don't post a chip to a surface that can't show one.
 
-**What the brief must contain to survive contact:**
-
-- **End the resume prompt with a `Recommended model:` line** (hybrid model routing):
-  the tier the next session should start on plus a one-line why —
-  e.g. `Recommended model: sonnet — remaining items are all low-stakes copy tweaks`.
-  Default to the strong session model; recommend a cheaper tier only when the
-  remaining contiguous run of work is uniformly low-stakes (source the tags from your
-  queue's model-fit tags, if it keeps them — this install's source: `LOCAL.md` beside
-  this skill, when your copy keeps one, *Recommended-model line*). The line
-  is advisory — the user acts on it at spawn time; the brief must still work if the user
-  ignores it.
-- **Open with a branch VERIFY, not a `cd`.** A brief starting "cd `<worktree>` and
-  read the handoff" strands the successor when the worktree was flipped to another
-  branch at spawn — the handoff file appears to have vanished. First action: `cd`,
-  then `git symbolic-ref -q HEAD || git checkout <branch>`, confirm
-  `git branch --show-current` matches the branch the brief names, *then* read.
-- **Write it worktree-agnostic.** A resume chip may start in a **fresh worktree**, so a
-  hard-coded path points the new session at a tree it doesn't own — and a fresh
-  worktree has **no `node_modules`**, which makes a coding agent exit 127 or symlink
-  a sibling's. Name the **repo and the commit** ("main was `<sha>` at handoff"), say
-  how deps are installed, and treat any worktree path as advisory with an "if the
-  directory is missing, `git worktree add <path> <branch>`" clause.
-- **State the blocker above the task.** What's useful to hand forward is usually not
-  "do the QA" but *why it can't just be done*: no production credentials exist, prod
-  403s behind Cloudflare, and entering a password is prohibited — so the task
-  structurally requires the user to act first. Name the blocker, what unblocks it,
-  and who can.
-- **"The human never did their part" is the FIRST branch of the diagnostic tree.**
-  An otherwise excellent brief stranded a session because its two branches were both
-  *code* failure modes, while the truth was that the third party never filed the item
-  the test needed — the drain had nothing to process. The human step is fresh every
-  time; code paths were at least tested once. And say **how to tell "not done yet"
-  from "done but broken"** when they look identical locally. Tell you're writing this
-  bug: your brief says "ask X to do Y, then wait N seconds and check Z" with no step
-  in between that confirms Y happened.
-- **Phrase each remediation arm with its premise-check inline.** "If the probe shows
-  v12 → tell the user to relaunch" encoded a stale theory as fact; the relaunch *had*
-  happened and the real cause was elsewhere. Write "if v12 AND the app process
-  predates the fix → relaunch; if v12 but the app postdates it → diagnose deeper," so
-  the successor can tell "Y will fix it" from "Y already ran and didn't."
-- **For a cross-repo issue, split the record.** Put the pointer where the symptom
-  appears (that repo's tracker genuinely will be read) and the instructions where
-  they can be executed (a globally-addressable brief). One without the other strands
-  the work. Carry the *target* repo's git posture too — branch and `status --short`
-  — since the resuming session will assume a clean tree.
-- **Never overwrite a handoff artifact you haven't read.** Date-suffix a new one,
-  mark it "**SUPERSEDES `<old>` — ignore that file**", and repoint memory's brief
-  pointer in the same turn, saying *why* the old one is stale.
-
-**The chip is live and irrevocable — memory is the real control surface.**
-
-- **A started chip cannot be recalled.** Where the harness offers a tool to withdraw a
-  posted chip, it refuses once the user has clicked, and chip ids may not survive an
-  app restart, so a stale chip can outlive your ability to withdraw it. Never report a
-  chip as withdrawn without reading the tool result. (The tool's name: `LOCAL.md`
-  beside this skill, when your copy keeps one, *Withdrawing a chip*.)
-- **Memory's "NEXT =" pointer is what actually steers the successor.** Update it the
-  moment priorities change, not after posting chips — a mis-started session reads
-  memory on boot and self-corrects. Anything you cannot clean up, **annotate**: mark
-  the follow-up CLOSED and say "if that chip is still on screen it is stale, ignore
-  it."
-- **The chip gets clicked before your handoff finishes** — recorded three times. Post
-  it only once memory and the plan are already written, and make step 1 correct on
-  its own.
-- **One chip per stream, in dependency order.** Never post a second for a stream
-  that already has a running successor (two sessions then race one worktree), and for
-  strictly sequential work post only the *first* unit's chip — let that session post
-  the next. Don't let a subagent spawn chips at all: a read-only investigator lacks
-  the context to know whether its find is in scope, and a chip is only for work you
-  have decided **not** to do.
-
-One resume per independent work stream; sequential work gets ONE. Skip entirely
-only when the program is complete and nothing remains to resume.
-
-Caveat: claude.ai routines (the remote-trigger API) run in the cloud with **no
-local filesystem access**, so they cannot continue local-repo work — never route
-a local-repo handoff there regardless of device.
+**What the brief must contain, and how chips behave once posted:**
+[resume-brief.md](resume-brief.md). Read it before writing the brief: it opens with
+a branch verify, works from a fresh worktree, states the blocker above the task and
+ends with a `Recommended model:` line; post one chip per stream, in dependency order.
 
 ### 9. Archive the session
 
@@ -503,23 +434,6 @@ session can't finish its own handoff.
   command, the specific edit.
 - **Handing off dirty.** Uncommitted changes + shared working tree = another
   session's branch switch silently destroys the work.
-- **Ending the session on a context-percentage timer.** Retired — that spends a
-  click to dodge a compaction that write-through already made harmless. Run long;
-  hand off at real boundaries, not at a threshold.
-- **Letting state live only in chat, then treating compaction as data loss.** The
-  fix isn't to stop early — it's to write decisions/status through to the record
-  as they happen, so the summary is never the record.
-- **Being mid-edit at a compaction.** Land or WIP-commit the in-flight unit before
-  continuing; that's the one thing to actually avoid.
-- **Posting a clickable resume to a surface that can't show it.** Route by the
-  surface the session already knows it is on; don't ask.
-- **Trying to drive a user-only launch surface.** Where the launcher is one only the
-  user can operate, the handoff ends with the copyable resume prompt for the user to
-  paste in.
-- **Arming an auto-firing task for resume the user didn't ask for.** Resume is a
-  user-clicked chip or a user-pasted prompt. (This install's versions of these three:
-  `LOCAL.md` beside this skill, when your copy keeps one, *Resume-routing failure
-  modes and checklist*.)
 - **Skipping the Skills Review / learnings pass** because the session "went
   fine". The pass exists to harvest what went fine into reusable rails.
 - **Leaving services running.** The next session (or the user) inherits port
@@ -534,6 +448,11 @@ session can't finish its own handoff.
 - [ ] Services you started are down; git sweep done; shared checkout pristine
 - [ ] Atlas vault note refreshed for every project materially changed (step 3b)
 - [ ] Skills Review appended; learnings captured per applicable skill
+- [ ] Result held against the owner's judgment lens, when this install keeps one: one read,
+      then a check of the work against its top items, each miss fixed or named in the record.
+      The lens predicts how the owner judges work; it never approves, decides or speaks for
+      them (this install's lens: `LOCAL.md` beside this skill, when your copy keeps one,
+      *Owner lens*)
 - [ ] Resume routed by surface when work remains — a resume chip, or the copyable
       prompt where the surface can't show one, self-contained either way
 - [ ] Session archived (last action)

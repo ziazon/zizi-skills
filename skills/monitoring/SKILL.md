@@ -1,5 +1,6 @@
 ---
 name: monitoring
+category: Engineering
 description: >
   Observability into running code. Use when adding logging or instrumentation, diagnosing a
   running service ("watch the logs", "what is it actually doing"), standardizing log output, or
@@ -53,10 +54,6 @@ state transitions, and every branch that ends in an error or early return.
 - **Tri-state for idempotent startup/maintenance tasks:** log success / no-op ("already
   up to date") / failure as distinct messages, so "did nothing" is never mistaken for
   "failed" (or vice versa).
-- **Levels with intent:** error = needs attention, warn = degraded/recoverable,
-  log/info = lifecycle milestones, debug = detail off by default.
-- **Skip hot paths:** no per-iteration logs inside loops or per-row logs in query paths
-  — they drown the signal and cost real latency. Log the batch summary instead.
 - **Never log secrets/PII:** redact tokens, passwords, auth headers, and full payloads
   that carry credentials — logs outlive the request and get shipped to third parties.
 
@@ -91,45 +88,15 @@ Logging above is the default; reach for metrics/tracing when a service needs agg
 health, not just per-event evidence. This is design rules only — the alerting *plumbing*
 is infrastructure.
 
-- **Define the questions first.** Before instrumenting, write the 2–4 things on-call must
-  answer about this feature (e.g. "what fraction of payments retry?", "is the provider
-  slow?"). No question → you log everything and learn nothing.
-- **Metrics:** RED (rate / errors / duration) per endpoint and per external dependency;
-  USE (utilization / saturation / errors) for resources. Always histograms/percentiles
-  (p50/p95/p99) — an average hides the 1% having a terrible time.
-- **Cardinality:** metric labels only from small fixed sets (route template, status class,
-  provider) — NEVER user IDs, raw URLs, or error text. That detail belongs in logs/traces.
-- **Alert on symptoms users feel** (error rate, p99, queue age); causes (CPU, a restart)
-  go on dashboards, not the pager. Every alert must be actionable, link a runbook, and have
-  a justified threshold + duration. Two severities only (page / ticket). Test-fire each new
-  alert once.
 - **Tracing (if ever added):** use OpenTelemetry and propagate context across every async
   boundary, or the trace dies at the gap.
-
-## Common failure modes
-
-- **Declaring success without observing the running behavior** — the #1 miss. If the
-  change affects runtime behavior, step 3–4 are mandatory, not optional polish.
-- **Bare `console.log`/`print` debugging left in** — use the project logger at debug
-  level, or remove the line before finishing.
-- **Logging a secret while diagnosing auth** — dumping headers/env/payloads to "see
-  what's being sent" leaks credentials into the transcript and log files. Log presence
-  and shape, never values.
-- **Noisy hot-path logs** shipped as "instrumentation" — per-row/per-iteration lines
-  bury the markers step 4 depends on.
-- **Unstable markers:** rewording an existing lifecycle line breaks whatever greps it.
-  Add new lines; don't casually rephrase established ones.
-- **Swallowed catch blocks** (`catch {}`) — the exact branch you'll later need eyes on
-  is the one that logs nothing.
 
 ## Before you call this done
 
 - [ ] Used the project's logger + conventions (no bare print/console.log left behind).
-- [ ] Errors and degraded paths log cause + context; nothing swallowed silently.
 - [ ] No secrets/PII in any added log line.
 - [ ] Ran the affected path and captured output to a file (or explicitly stated why not).
 - [ ] Asserted success markers present AND failure markers absent; probed externally.
-- [ ] Reported the concrete evidence observed, and what remains unverified.
 
 ## Related skills
 

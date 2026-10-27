@@ -1,5 +1,6 @@
 ---
 name: tabler-ui
+category: Design
 description: >
   Tabler admin template (tabler.io) components and the workarounds that make them behave in Vue
   3. Consult before any Tabler markup or interactive component: modals, dropdowns, badges,
@@ -9,7 +10,7 @@ description: >
 
 # Tabler UI
 
-The user uses Tabler extensively. Goal: build great interfaces from Tabler's component
+Goal: build great interfaces from Tabler's component
 set, and know the gotchas — Tabler ships Bootstrap-flavored markup + vanilla JS that
 often needs adapting for reactive frameworks. The real content lives in the reference
 files below; this file routes you to them.
@@ -33,13 +34,6 @@ not-yet-promoted captures — check it too when working in an area touched recen
 
 ## Step 2 — compose from Tabler's toolbox, matching the app
 
-- **Know the toolbox.** Tabler provides cards, page header/body, steps/wizards, tables,
-  forms (form-control/form-select/form-check + validation states), buttons, badges,
-  alerts, empty states, input groups/icons, navs/tabs, offcanvas, dropdowns, modals,
-  datagrid, status/avatars, and a large utility layer. v1.6 added a datepicker, OTP
-  input, password-strength meter, sparklines, legends, signal bars, clipboard buttons
-  and confetti (see versions.md before using any of them). Compose these rather than
-  hand-rolling; lean on the utility classes for spacing/layout.
 - **Check the reference templates for UX shape.** Before designing a screen's layout,
   look at the official Tabler template bundle you downloaded from tabler.io (its admin
   dashboard pages, emails, icons, avatars and illustrations) — they show the intended

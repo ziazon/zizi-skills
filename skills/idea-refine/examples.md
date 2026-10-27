@@ -4,9 +4,22 @@ These examples demonstrate what good ideation sessions look like across differen
 
 ---
 
+## Contents
+
+- Example 1: Vague Early-Stage Concept (Full 3-Phase Session)
+- Problem Statement
+- Recommended Direction
+- Key Assumptions to Validate
+- MVP Scope
+- Not Doing (and Why)
+- Open Questions
+- Example 2: Feature Idea Within an Existing Product (Codebase-Aware)
+- Example 3: Process/Workflow Idea (Non-Product)
+- What to Notice in These Examples
+
 ## Example 1: Vague Early-Stage Concept (Full 3-Phase Session)
 
-**User invokes:** `/ideate I want to help small local restaurants compete with the big delivery platforms`
+**User invokes:** `/idea-refine I want to help small local restaurants compete with the big delivery platforms`
 
 ### Phase 1: Understand & Expand
 
@@ -129,7 +142,7 @@ SMS-first (not app-first) is likely the right channel. A text saying "Hey, want 
 
 ## Example 2: Feature Idea Within an Existing Product (Codebase-Aware)
 
-**User invokes:** `/ideate adding real-time collaboration to our document editor`
+**User invokes:** `/idea-refine adding real-time collaboration to our document editor`
 
 ### Phase 1: Understand & Expand
 
@@ -175,7 +188,7 @@ Given your architecture and the competitive context, I'd push you toward variati
 
 ## Example 3: Process/Workflow Idea (Non-Product)
 
-**User invokes:** `/ideate a better way to run our weekly team retrospectives — they've gotten stale and people dread them`
+**User invokes:** `/idea-refine a better way to run our weekly team retrospectives — they've gotten stale and people dread them`
 
 ### Phase 1: Understand & Expand
 

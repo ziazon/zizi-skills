@@ -9,21 +9,24 @@ scored **19**/89/77/61 — the gap is structural, explained below. (This install
 apps, hosts and scores: `LOCAL.md` beside this skill, when your copy keeps one —
 *web-performance.md — Reference apps and target*.)
 
+## Contents
+
+- Performance triage (where to look before you optimise)
+- Running Lighthouse (the DevTools panel is a GUI over a CLI)
+- Why an HTML-first app beats a hydration-heavy SPA (a worked example)
+- Remediation playbook (ordered by MEASURED impact, each tied to its Lighthouse audit)
+- Regression gate — run it after a staging release
+
 ## Performance triage (where to look before you optimise)
 
 Measure first, then fix the proven bottleneck — general web-perf mechanics that frame the
 remediation playbook below:
 
-- **Core Web Vitals "Good" thresholds:** LCP ≤ **2.5s**, INP ≤ **200ms**, CLS ≤ **0.1**. These are
-  the pass/fail bar for the Performance-adjacent field metrics.
 - **Symptom → where to measure:**
   - *Slow first load* → bundle size / TTFB / render-blocking resources (the worked example's
     killer was a ~1.5 MB render-blocking CSS bundle — see the baseline below).
   - *Sluggish interaction* → long tasks >50ms on the main thread / excess re-renders / layout thrash.
   - *Slow after navigation* → API waterfalls (serialised requests that should be parallel).
-- **Synthetic vs RUM:** use Lighthouse / DevTools for reproducible lab runs and isolating a specific
-  regression; use a `web-vitals`-style RUM library to validate the fix actually helped real users
-  (lab numbers can improve while field metrics don't, and vice-versa).
 - **Perf budgets in CI** (bundlesize / Lighthouse CI) catch silent regressions. A
   PurgeCSS-safelist gotcha (a theme-variant purge shipped a bloated/broken bundle) is the kind of
   bundle regression that makes this a live concern, not a hypothetical one — see the Regression
@@ -36,9 +39,15 @@ The Chrome DevTools "Lighthouse" tab runs the **Lighthouse engine**, which also 
 Node CLI — so audits are fully runnable headlessly, no GUI needed. Use the helper:
 
 ```bash
-scripts/lh-audit.sh <url> [desktop|mobile|both] [outdir]
+scripts/lh-audit.sh [--runs N] [--since <ref> [--until <ref>] --paths <file> [--repo <dir>]] \
+  <url> [desktop|mobile|both] [outdir]
 # e.g. scripts/lh-audit.sh https://staging.example.com/ both ./.lighthouse
+# e.g. scripts/lh-audit.sh --runs 3 https://staging.example.com/ mobile
 ```
+
+`--runs N` (1–9) runs each form factor N times and reports the median per category and
+metric; the failing-audit list comes from the median-performance run. `--since` is the
+regression gate's trigger (below).
 
 It runs a locally installed `lighthouse` CLI (it never downloads one) with a **pinned config**, saves timestamped JSON+HTML per form-factor,
 and prints category scores, Core Web Vitals, and the top failing audits ranked by estimated
@@ -181,7 +190,18 @@ your copy keeps one — *web-performance.md — Regression gate*.)
 - **Trigger:** `git diff --name-only <prev-tag>..<new-tag>` over the public path set (public
   views, public layout components, public content sections, the public layout, the SSR entry,
   the server, the bundler config, global CSS, `package.json`) returns anything.
-- **Run:** `lh-audit.sh https://staging.example.com/ both` — median of 3.
+- **Run** (trigger and audit in one; keep the path set in a file, one pattern per line, a
+  trailing `/` for a folder, else a shell glob):
+
+  ```sh
+  bash <skill-dir>/scripts/lh-audit.sh --runs 3 --since <prev-tag> --until <new-tag> \
+    --paths <public-paths.txt> --repo <repo> https://staging.example.com/ both
+  ```
+
+  It prints `no watched path changed …; skipping` and exits 0 when the diff misses every
+  pattern (Lighthouse not needed); otherwise it lists the matched paths and prints the median
+  of 3 per category and metric. Exit 0 audited or skipped; 1 Lighthouse missing or a run
+  failed; 2 usage or a bad ref.
 - **Compare + record:** against a baseline log kept in your project docs, which carries the
   current numbers, the floors, and the standing caveats. Append a block per release (the
   helper prints a `ROW|` line for this).

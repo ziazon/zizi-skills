@@ -1,5 +1,6 @@
 ---
 name: tdd-skill
+category: Engineering
 description: >
   Test-first (red-green-refactor) for any codebase. Use when adding or changing behavior, fixing
   a bug (it starts with a failing regression test), or asked to add or cover tests. Finds how
@@ -34,11 +35,6 @@ plain TS). Consult the **project-config** skill's reference file first; if the
 facts aren't recorded there, discover them once and record them (its
 record-on-miss rule). What you need before writing any test:
 
-- The runner: `package.json` scripts (jest/vitest/mocha), `Gemfile` +
-  `.rspec` (RSpec), `pytest.ini`/`pyproject.toml` (pytest), `go test`,
-  `cargo test`, `Makefile`/`justfile` targets, CI config (`.github/workflows`).
-- Where tests live and the naming pattern (`spec/`, `test/`, `__tests__`,
-  `*_test.go`, `*.test.ts`).
 - The fixture/factory and mocking conventions already in use — read 1–2
   neighboring tests and copy them, so your test reads like the rest.
 - How to run **one** test fast (single file / single case by name or line).
@@ -48,13 +44,8 @@ pass — that proves your invocation works before your own red/green means anyth
 
 ## The loop
 
-1. **Red** — write the smallest failing test that names the behavior you want.
-   Run it; confirm it fails for the *right reason* (the assertion, not a
-   typo/import/load error — a wrong-reason red proves nothing).
-2. **Green** — write the minimum code to make it pass. Run that one test.
-3. **Refactor** — clean up with the test green. Re-run.
-4. **Widen** — run the surrounding test file (and related ones) to catch
-   regressions before moving on.
+Confirm each red fails for the *right reason* (the assertion, not a
+typo/import/load error — a wrong-reason red proves nothing).
 
 Work one behavior at a time. Don't write five tests then five implementations —
 you lose the signal of which change made which test pass.
@@ -73,8 +64,21 @@ that pins the subtle requirement (e.g. a typed-nil check that `== nil` misses).
 ## Prove the test is load-bearing — mutate, don't admire
 
 Reverting the fix (above) is the bug-fix case. The general form is mutation: break
-the subject deliberately and require a red. Every rail here is a way that check has
-silently failed.
+the subject deliberately and require a red. For a one-string mutation, run exactly this
+(it refuses a string that is missing or appears twice, replaces it literally, runs the
+tests, and always restores the file byte-for-byte, even on Ctrl-C):
+
+```bash
+<skill-dir>/scripts/mutate-check.sh <file> '<old>' '<new>' -- <test command>
+```
+
+(`<skill-dir>` is this skill's base directory, which Claude Code prints when the skill loads).
+
+It exits 0 with `KILLED` when the tests failed (the test is load-bearing), 1 with
+`SURVIVED` when they passed, 2 when the mutation could not be applied (including an
+unwritable file), 130/131/143 after Ctrl-C, Ctrl-\\ or a TERM (file restored), 3 if a restore
+failed (the original's path is printed). Every rail below is a way the check has silently
+failed; the script covers the anchoring and restore rails, not the others.
 
 - **Mutate each claim separately.** A route's decorators are independent claims.
   `@UseGuards` was pinned by a test while `@RequireScope('write')` on the same route
@@ -98,8 +102,8 @@ silently failed.
   tree `checkout --` restores from HEAD — it deletes the whole slice's work in that
   file rather than the mutation you injected. This destroyed in-flight
   implementations twice, and because the specs survived it presented as a test
-  failure rather than a self-inflicted wipe. `cp <file> /tmp/bk` → mutate → run →
-  `cp /tmp/bk <file>`, then `cmp -s`. Tell-tale that you just wiped yourself: after
+  failure rather than a self-inflicted wipe. `mutate-check.sh` (above) does the backup,
+  restore and `cmp -s` for you. Tell-tale that you just wiped yourself: after
   "restoring", `git status` no longer lists the file as modified. Reserve
   `checkout --` for code already committed.
 - **Red-check per FILE, never per suite.** A delegated e2e spec "proved" that a raw
@@ -325,14 +329,6 @@ Skip trivial passthroughs and pure config; a test there is noise.
 
 ## Common failure modes (stop if you catch yourself doing these)
 
-- **Writing the implementation first, then a test that passes immediately** —
-  that test was never red; you don't know it can fail. Go back and red it
-  against the old/broken code.
-- **Accepting a red for the wrong reason** (import error, typo, missing fixture)
-  as "the failing test." Fix the harness issue until the failure is the assertion.
-- **Trusting green mocked tests for query/schema code** — run it on a real DB.
-- **Testing the handler and calling the auth change covered** — pin the
-  decorator/guard wiring too.
 - **Pre-populating state the app loads asynchronously** — mount empty, then
   deliver the data.
 - **Fighting a framework gotcha inside the harness** (e.g. Rails `after_commit`
@@ -352,8 +348,6 @@ Skip trivial passthroughs and pure config; a test there is noise.
   real assertion. They looked thorough in review. Corollary: when a test aborts
   early, every assertion after the abort point is unverified even though it is
   written down — after fixing the abort, re-read them as if new.
-- **Declaring done from "it compiles" or "the suite is green"** without a test
-  that exercises the new behavior specifically.
 
 ## Before you call this done
 

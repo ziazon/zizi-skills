@@ -1,5 +1,6 @@
 ---
 name: information-architecture
+category: Design
 description: >
   How content and pages are organized for their audience: site maps, page inventories, each
   page's job, where a message or feature lives, navigation and funnels, heading structure,
@@ -16,13 +17,7 @@ user who scans, not reads.
 
 ## Before structure: audience, then thesis
 
-IA is medium-agnostic — a site, a book, a curriculum, a technical paper and a
-legal argument are one discipline. Writing is another form of information
-architecture, and it is the same skill that builds a website. That makes the
-writing skills partners rather than rivals: IA settles what the sections are,
-what order they run in and what each has to prove, then academic-writing or
-plain-language decides how the sentences inside them sound. Reach for both on
-any prose deliverable. Whatever the medium, two questions come before any
+Whatever the medium, two questions come before any
 structural decision:
 
 1. **Who is the audience, and what do they need from you?** Not who you want to
@@ -40,13 +35,6 @@ pitch low-to-medium, or give advanced readers their own wing — and if it's a
 wing, decide whether it belongs inside this property or is a separate one. The
 more diverse the audience, the harder the job; don't let that decision stay
 implicit.
-
-**Audience is researched, not assumed.** On client work, interview the client
-extensively about who they *actually* want to reach. Interview subject-matter
-experts for the content itself. Being highly skilled at building the thing is
-not the same as knowing its subject or its users — and when the subject is
-outside your expertise, you still have to go deep into it before you can
-structure it.
 
 ## Core principles
 
@@ -79,19 +67,12 @@ structure it.
 7. **Structure changes are content decisions first.** Decide placement and
    hierarchy in prose (what, where, why) before touching markup; then let the
    design/frontend skills own how it looks and how it's built.
-8. **Outline before prose.** Never start writing — or building pages — and let
-   the structure emerge behind you. Put the whole structure in place first:
-   thesis → the discrete chunks that support it → conclusion. The reliable shape
-   is an argument: state the claim, then the first piece of evidence, the
-   second, the third, and then show that all of them arrive at the same
-   conclusion. Every project supports its thesis differently; the outline is
-   where you work out how this one does.
-9. **The opening and the closing carry the most weight.** An entry page *is* the
+8. **The opening and the closing carry the most weight.** An entry page *is* the
    introduction: after reading it a first-time visitor should know exactly what
    this is about, and be able to either go deeper or stop there satisfied. Size
    it to the medium — the first page of a site, the first chapter of a book, the
    first two pages of a twenty-page paper.
-10. **Keywords carry through.** Fix the handful of terms the project owns and use
+9. **Keywords carry through.** Fix the handful of terms the project owns and use
     them consistently from the entry page down into every subsection, in one
     writing voice. Consistent vocabulary is what makes a set of pages read as a
     single argument rather than several separate ones.
@@ -149,6 +130,10 @@ Run this on any content page addition/change, and as a periodic audit:
 - Record project-specific IA decisions (page jobs, section order rationale,
   key-message map) in the project's own docs so later sessions don't re-derive
   or accidentally undo them.
+- Moving or restructuring a live site (a client's old site to a new build, a
+  platform change, a new URL scheme)? Follow [site-migration.md](site-migration.md)
+  before any URL changes: the inventory, the redirect map, URL rules, launch and
+  the two weeks after.
 
 Per-lesson history lives in `LEARNINGS.md` beside this skill, when your copy keeps one.
 
@@ -157,3 +142,4 @@ Per-lesson history lives in `LEARNINGS.md` beside this skill, when your copy kee
 - [planning](../planning/SKILL.md): a placement decision is a plan-time decision; it belongs in the plan's single question round.
 - [research-methods](../research-methods/SKILL.md): long papers and institutional documents (definitions up front, a roles-and-responsibilities spine) take their structure from here.
 - [data-analytics](../data-analytics/SKILL.md): that skill decides which metrics a dashboard shows; this one decides where the dashboard and each figure sit.
+- [marketing](../marketing/SKILL.md): that skill picks the page's one behavior, its obstacle and the persuasion levers; this one decides where each lever and CTA sits.

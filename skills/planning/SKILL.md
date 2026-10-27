@@ -1,5 +1,6 @@
 ---
 name: planning
+category: Workflow
 description: >
   Plan before building anything non-trivial: multi-file or multi-phase work, a feature, a
   migration, or whenever asked to plan. Research, write the plan, ask every decision up front (a
@@ -99,6 +100,49 @@ every 2-3 steps. A wide refactor that cannot land green as one vertical slice (a
 column rename, a shared type changing shape) is planned as **expand → migrate in
 batches, smallest blast radius first → contract**, each step green on its own.
 
+The plan file's skeleton:
+
+```markdown
+# <Plan title>
+Ticket: <link>
+
+## Phases
+### Phase 1: <name>
+Verified when: <how we'll know this phase worked>
+Files to touch: <paths>
+
+#### Step 1.1: <title> (Size: S)
+- Acceptance criteria: <at most 3 bullets>
+- Verification command: `<named command>`
+- Files likely touched: <paths>
+- Test seams: <where it is proven>
+- Blocked by: <step ids, or none>
+
+## Decision log
+| Decision | Chosen option | Why |
+| --- | --- | --- |
+
+## Not yet specified
+- Phase <n>: <precise open question>
+- Phase <n>: fog, researched at its pickup
+
+## Always / Never
+- Always: <in scope>
+- Never: <explicitly out of scope>
+
+## Progress
+| Phase | Status |
+| --- | --- |
+```
+
+**Create every ticket before any of them is worked.** Once the steps are sliced, each
+one becomes a ticket, and all of a plan row's, epic's or ticket's children exist before
+anyone works any of them. Each ticket's description starts `Blocked by:` with its
+blockers' links (or `none`); create blockers first so every link already exists, and put
+a blocked ticket where the tracker keeps blocked work. A step split later follows the
+same rule. (This install's rule and procedure: `LOCAL.md` beside this skill, when your
+copy keeps one.)
+
 ### 3. Front-load EVERY question — before approval, in at most two gates
 
 Surface all decisions that need the user's input **upfront, batched together**,
@@ -118,6 +162,12 @@ forgot to ask. Reframe any vague requirement as a measurable success criterion
 before you plan to it ("make it faster" → "LCP < 2.5s on 4G — right target?").
 Every "ask-first" item belongs in this batch and must be settled here, never
 deferred to mid-execution.
+
+**A question about an observable fact is not a gate question.** If running code can
+answer it (behavior, timing, layout, performance), build a throwaway prototype or probe
+and let the result decide; keep the gate for preference and priority calls. This
+extends the principle *Before asking the user for a value or a decision, read where
+the system already holds it* from reading to running. (Adapted 2026-10-17 from pstack.)
 
 Make each question cheap to answer — the recommendation IS the technique: attach
 your best guess to every question, because a user reacts to a wrong guess faster
@@ -180,7 +230,7 @@ skill at all.)
   the tree compilable/green between slices, and keep increments rollback-friendly
   (migrations get down paths; don't delete-and-replace in one commit).
 - Before each slice, run a simplicity check: are the abstractions earning their
-  complexity? Three similar lines beat a premature abstraction; if a staff
+  complexity? If a staff
   engineer would say "why didn't you just…?", do the simpler thing.
 - Keep the trackers current as phases land: the plan file's Progress table, and
   the repo's plan lifecycle files where they exist (e.g. `plans/PROGRESS`,
@@ -246,24 +296,10 @@ execution record (what shipped, deviations from plan, verification evidence), an
 update the lifecycle trackers. An unarchived finished plan pollutes the pending
 list for every future session.
 
-## Common failure modes
-
-- **Building while "planning".** Writing implementation code before approval
-  voids the gate — the user ends up reviewing a fait accompli.
-- **Trickling questions.** Asking one question, building, asking another — each
-  interruption is exactly what front-loading exists to prevent.
-- **Questions without recommendations.** "Option A or B?" pushes the research
-  back onto the user; recommend one and say why.
-- **A plan with no per-phase verification.** "Then it works" is not a check; name
-  the command/observation that proves each phase.
-- **Chat-only plans.** Not resumable, not reviewable; commit the file.
-- **Finished plan never archived / trackers stale.** The next session trusts the
-  trackers; keep them true in the same turn the state changes.
-
 ## Before you call this done
 
 - [ ] Plan exists as a committed `plans/` file with phases, files, decisions, verification
-- [ ] All user decisions were asked in ONE upfront batch, each with a recommendation
+- [ ] All user decisions were asked in the first gate (plus a dependent second gate), each with a recommendation
 - [ ] User approved before implementation began
 - [ ] Each phase's verification ran and passed (or the failure is reported honestly)
 - [ ] Progress table + lifecycle trackers current; finished plan archived with an execution record
@@ -276,6 +312,7 @@ list for every future session.
 - [information-architecture](../information-architecture/SKILL.md): where content, pages and nav items live is a plan-time decision; lock it in the batched question round.
 - [security-and-hardening](../security-and-hardening/SKILL.md): its "Ask first" list is a plan-time question set; fold it into the same round.
 - [source-driven-development](../source-driven-development/SKILL.md): a docs-vs-codebase conflict is raised here, at plan time, not mid-build.
+- [adversarial-review](../adversarial-review/SKILL.md): when the human asks for it, a multi-seat panel designs the plan's input, and a two-family review attacks the drafted plan before it runs.
 
 ## Capturing learnings (session-handoff protocol)
 

@@ -1,5 +1,6 @@
 ---
 name: infrastructure
+category: Engineering
 description: >
   Change infrastructure and dev-workflow tooling: Nomad, Consul, Vault, Terraform, Docker,
   GitHub Actions, task runners, env and direnv setup, setup scripts, a project's own ops CLI,
@@ -52,10 +53,6 @@ discipline is: learn the layout, mirror conventions, validate before apply.
 
 ## CI optimization
 
-- **When a pipeline exceeds ~10 min, apply in order:** cache deps → parallelize
-  lint/typecheck/test into separate jobs → path filters to skip unrelated jobs →
-  matrix-shard the test suite → move slow tests to scheduled runs → larger runners.
-  Optimize the pipeline; don't skip gates or disable flaky tests.
 - **Feature-flag / kill-switch lifecycle:** create → canary → full rollout → REMOVE the
   flag and its dead code. Set a cleanup date at creation, or the flag becomes permanent
   debt. (An env kill-switch a product ships is no exception — the same lifecycle
@@ -135,8 +132,6 @@ discipline is: learn the layout, mirror conventions, validate before apply.
 
 ## Common failure modes
 
-- **Applying without planning** — Terraform/Nomad changes reviewed only by eye. The plan
-  output IS the review; skipping it turns a typo into an outage.
 - **Editing a workspace lib and expecting consumers to see it** — when a monorepo's
   consumers pin exact PUBLISHED versions of its scoped packages, a `libs/*` edit is
   invisible until published + bumped (never rsync `dist/` into node_modules). This
@@ -145,8 +140,6 @@ discipline is: learn the layout, mirror conventions, validate before apply.
 - **Trusting a green check from the wrong environment:** a `zsh -lic` node-version probe
   doesn't reflect the Bash tool's snapshot; a server on the right port may be a stale
   process from another worktree. Verify in the environment that actually runs the thing.
-- **Hardcoding what the stack derives:** ports, tokens, service addresses — Consul/Vault/
-  env own these; a literal value works locally and breaks deployed.
 - **Missing per-package framework deps in the monorepo:** a Nest service that doesn't
   declare `@nestjs/core` resolves a hoisted, mismatched version → runtime DI failures.
 - **Breaking the host from an automation:** hooks/scheduled jobs must catch everything,
@@ -166,15 +159,6 @@ discipline is: learn the layout, mirror conventions, validate before apply.
   useful ones are.
 - **Running a non-root container against a host bind mount without planning ownership** —
   you cannot `chown` a mount root, so mount the **parent** and write to a subdirectory.
-
-## Before you call this done
-
-- [ ] Read the relevant reference file; change mirrors existing conventions.
-- [ ] No secret hardcoded, printed, or partially revealed anywhere.
-- [ ] Dry-run/plan/lint executed and its output reviewed before apply.
-- [ ] Blast radius stated (envs/services affected); change is minimal and reversible.
-- [ ] Verified from a clean state in the environment that actually runs it.
-- [ ] New setups/gotchas recorded per the protocol below.
 
 ## Related skills
 

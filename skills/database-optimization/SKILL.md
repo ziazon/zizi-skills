@@ -1,5 +1,6 @@
 ---
 name: database-optimization
+category: Engineering
 description: >
   Correct, fast queries, views, indexes and schema. Use before adding or changing any query (ORM
   or raw), entity, migration, index or view, and when an endpoint or list is slow. In a TypeORM
@@ -48,10 +49,7 @@ until you know what the query actually does per request.
 ### 4. Measure on realistic data
 
 Run `EXPLAIN (ANALYZE, BUFFERS)` (or the engine's equivalent) on realistic data; compare
-before/after. Look for seq scans on big tables, nested-loop blowups, sorts spilling to
-disk, and row-count explosions. Index the columns in filters/joins/sort (composite/
-partial for common predicates), don't over-index write-heavy tables, and verify the
-planner actually USES the index — an unused index is pure write cost.
+before/after.
 
 Gate: do not claim a performance win without a before/after measurement, and do not
 trust a timing taken on a contaminated local DB (zombie queries from timed-out probes
@@ -91,8 +89,10 @@ Each of these passed unit tests and failed against a real database. Details live
    into Rails-owned tables (no DB default) violate NOT NULL at runtime. Set
    `createdAt`/`updatedAt` explicitly (`new Date()`) on every write path; a global
    subscriber covers the general case.
-6. **Any schema or view change needs a generated TypeORM migration** — publishing the
-   model package only updates TS types, never the database (this install's notes:
+6. **Any schema or view change needs a migration in the project's own migration runner** —
+   publishing the model package only updates TS types, never the database. Where the project
+   has one DDL runner, the migration goes there, and an ORM's generated migration is a
+   drafting aid at most (this install's runner and notes:
    `LOCAL.md` beside this skill, when your copy keeps one — *view-materialization
    references*).
 7. **Repository/ORM API over raw `manager.query`** (step 3) — including tiny lookups
@@ -195,19 +195,18 @@ Read the matching file before working in its area:
 - This install's view/materialized-view notes (when a view change needs a migration,
   build-then-swap, unique grain for CONCURRENT refresh, perf-testing hygiene): `LOCAL.md`
   beside this skill, when your copy keeps one — *view-materialization references*.
-- [postgres-tuning.md](postgres-tuning.md) — general engine-level Postgres: server/memory
-  config, diagnostics (`pg_stat_statements`, EXPLAIN/BUFFERS), bloat & autovacuum, bulk
-  ops, locks, read-replica scaling, pgvector. Consult when the question is general
+- [postgres-tuning.md](postgres-tuning.md) — general engine-level Postgres: bloat &
+  autovacuum, bulk ops, long transactions on the primary. Consult when the question is general
   Postgres rather than project-specific.
 
 ## Before you call this done
 
 - [ ] Access pattern understood (filters, joins, sort, cardinality) — not guessed.
 - [ ] ORM-first; any raw SQL is parameterized and justified inline.
-- [ ] Checked the hard-rules list; none of the seven apply unhandled.
+- [ ] Checked the hard-rules list; none of them apply unhandled.
 - [ ] Executed the real query against a real DB (DataSource script, psql, or live app).
 - [ ] Perf claims backed by before/after `EXPLAIN (ANALYZE, BUFFERS)` on clean data.
-- [ ] Schema/view changes carry their generated migration.
+- [ ] Schema/view changes carry their migration, in the project's own runner.
 
 ## Related skills
 

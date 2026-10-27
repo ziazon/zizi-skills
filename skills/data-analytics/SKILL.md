@@ -1,5 +1,6 @@
 ---
 name: data-analytics
+category: Growth
 description: >
   Decide which metrics, KPIs and charts an app's data deserves. Use when exploring a schema or
   domain, planning a dashboard ("what should this show?", "add stats to X"), or choosing which
@@ -50,10 +51,7 @@ For each candidate metric, state all four (a metric missing any of these isn't p
 yet):
 
 1. **The question it answers** and for whom (audience → also sets data-scoping/auth).
-2. **The chart type it deserves:** trend over time → line; funnel/stage conversion →
-   funnel; categorical comparison → bar; current snapshot of one number → single stat;
-   detail/ranking → table; distribution → histogram. Don't default everything to a stat
-   card row.
+2. **The chart type it deserves.** Don't default everything to a stat card row.
 3. **The grain** (per user / partner / location / day) and roughly the query shape.
 4. **The source** (table/view/columns) — including whether the data is internal or needs
    an external integration (recalls, maintenance schedules, etc.).
@@ -84,7 +82,27 @@ external source**.
   scans on operational tables) — hand the query-tuning itself to database-optimization.
 - Record the entity catalog, lifecycles, validated metrics, and gaps in `LEARNINGS.md`
   beside this skill, when your copy keeps one — the catalog is the deliverable that
-  outlives the session.
+  outlives the session. One section per project:
+
+  ```markdown
+  ## <project>
+  Entities: <entity> → <table/view>, key columns, relationships; ...
+  Canonical id: <which id; how legacy and new ids map>
+  Scoping: <who sees what, e.g. a partner admin sees only their partner id>
+  Lifecycles: <state machine or funnel>: <state/timestamp columns>; ...
+
+  | Metric | Question | Audience | Chart | Grain | Source | Screen | Status |
+  | --- | --- | --- | --- | --- | --- | --- | --- |
+  | <name> | <question it answers> | <who> | <line / funnel / bar / stat / table / histogram> | <per user / day / ...> | <table/view.columns> | <host screen> | validated / data gap: <what> / needs external source |
+
+  Gaps: <missing or unpopulated data>; rollup needed: <where>
+  ```
+
+## Measuring a public site or small app
+
+When the question is whether a site or app change worked (A/B test or not, event names, UTMs,
+consent, a "How did you hear about us?" field, finding the aha moment), use
+[site-measurement.md](site-measurement.md). Start with its sample-size arithmetic.
 
 ## Common failure modes
 

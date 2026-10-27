@@ -1,5 +1,6 @@
 ---
 name: design-guide
+category: Design
 description: >
   Visual and UX judgment: color, typography, spacing, hierarchy, themes. Use when choosing
   colors or status/badge colors, theming (white-label included), making a screen "look better"
@@ -40,6 +41,18 @@ user gets professional-looking results without having to drive the aesthetics.
    (e.g. sibling icons in the same badge, on the real background), then judge family-fit
    visually and let the user pick. This caught that a wide glyph never fits a square
    badge and that a half-scale car blobs at stroke-2 — obvious in render, invisible in code.
+   Run exactly this (needs `rsvg-convert` and `magick`: `brew install librsvg imagemagick`):
+
+   ```sh
+   bash <skill-dir>/scripts/montage.sh [--size 256] [--ref <existing.svg|png>]... <out.png> <option.svg>...
+   ```
+
+   It writes one PNG: the refs (labelled `ref: <name>`) then each option, on a light row and a
+   dark row. Labels use `--font <file>`, else `$MONTAGE_FONT`, else the first system font it
+   finds (a stock Homebrew ImageMagick knows no fonts and fails on a bare label). Exit 0
+   written; 1 a tool failed (its error shown); 2 usage, no options, an unreadable file or
+   font, or `--size` outside 16–2048; 4 a tool is missing. Look at `<out.png>` yourself before
+   showing it: a dark mark vanishing on the dark row is the finding, not a rendering bug.
 6. **Deliver a concrete recommendation** (specific colors/values), not a menu — with a
    one-line rationale. Offer a preview/sample when comparing options.
 7. **Verify in BOTH light and dark mode** before showing the result, with inline

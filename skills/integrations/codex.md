@@ -1,5 +1,13 @@
 # Codex CLI / Claude Code plugin — learnings
 
+## Contents
+
+- Invocation — the canonical dispatch form
+  - A flag error is not an outage
+  - Two constraints that shape the brief itself
+  - The sandbox also has NO OUTBOUND network, and cannot write the package caches
+- Claude Desktop hooks can run the OLDEST node (2026-07-10, live-verified)
+
 ## Invocation — the canonical dispatch form
 
 **Verified 2026-08-21 against codex-cli 0.148.0.** Check `codex --version` before trusting
