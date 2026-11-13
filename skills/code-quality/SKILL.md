@@ -328,26 +328,17 @@ originating PR*.)
   the user's call, made explicitly.
 - **Draft in-session and get approval before posting.** The user revises wording;
   posting happens on an explicit go, not on your read of "this looks ready."
-- **Mechanically, run exactly this** (paths relative to this skill's directory), dry
-  run first, then the approved post:
-
-  ```sh
-  bash scripts/post-review.sh <owner>/<repo> <pr> review.json          # validates, posts nothing
-  bash scripts/post-review.sh <owner>/<repo> <pr> review.json --post   # after the user's explicit go
-  ```
-
-  `review.json` is `{"body": "…", "comments": [{"path", "line", "side"?, "start_line"?,
-  "start_side"?, "body"}]}`. The review `body` is required and non-empty (a one-line
-  summary is enough when every point is on a line), and any other key exits 2. The script checks every anchor lies inside one of the PR's
-  diff hunks at the current head (GitHub rejects the WHOLE review with 422 when one
-  line is outside them), sets `commit_id`, refuses any `event` but `COMMENT`, posts
-  once, and reads the comments back. Exit 0 ok, 2 bad input, 3 an anchor outside the
-  diff, or in a file GitHub returns without a patch (binary or too large) (every one
-  listed; nothing posted), 4 `jq` or `gh` missing, 5 a GitHub call
-  failed or the head moved (never retried: a retry can double-post), 6 posted but
-  fewer comments read back. Still confirm each anchor's wording against the code
-  (`git show <ref>:<path> | sed -n '<a>,<b>p'`): the script proves the line is in the
-  diff, not that it is the line you meant.
+- **Check every anchor before posting, then post once.** GitHub rejects the WHOLE
+  review with 422 when one line lies outside the PR's diff hunks at the current
+  head, so check each `path`/`line` (and `start_line`) against the hunks first, and
+  a file GitHub returns without a patch (binary or too large) can't carry one. Pin
+  `commit_id` to that head and re-check the head just before posting; if it moved,
+  re-validate. Post as `COMMENT` exactly once: never retry a failed post, since it
+  may already have landed and a retry double-posts. Read the comments back and count
+  them. Then confirm each anchor's wording against the code
+  (`git show <ref>:<path> | sed -n '<a>,<b>p'`): being in the diff doesn't make it the
+  line you meant. (A script that does all of this: `LOCAL.md` beside this skill,
+  when your copy keeps one — *Posting reviews: the anchor-checking script*.)
 - **Verify across repo boundaries before asserting or asking.** On that PR an open
   question ("does the sibling service validate the hash?") and a standing nit both
   dissolved once the sibling repo was actually read. A question you could have

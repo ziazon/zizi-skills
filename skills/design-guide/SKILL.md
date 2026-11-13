@@ -41,7 +41,8 @@ user gets professional-looking results without having to drive the aesthetics.
    (e.g. sibling icons in the same badge, on the real background), then judge family-fit
    visually and let the user pick. This caught that a wide glyph never fits a square
    badge and that a half-scale car blobs at stroke-2 — obvious in render, invisible in code.
-   Run exactly this (needs `rsvg-convert` and `magick`: `brew install librsvg imagemagick`):
+   Run exactly this (needs `rsvg-convert` from librsvg and `magick` from ImageMagick, both
+   installed by the user):
 
    ```sh
    bash <skill-dir>/scripts/montage.sh [--size 256] [--ref <existing.svg|png>]... <out.png> <option.svg>...

@@ -84,7 +84,7 @@ rsvg=${RSVG_CONVERT:-rsvg-convert}
 magick=${MAGICK:-magick}
 for tool in "$rsvg" "$magick"; do
   if ! command -v "$tool" >/dev/null 2>&1; then
-    echo "montage: missing tool: $tool; brew install librsvg imagemagick" >&2
+    echo "montage: missing tool: $tool; install librsvg (rsvg-convert) and ImageMagick (magick) yourself, then re-run" >&2
     exit 4
   fi
 done

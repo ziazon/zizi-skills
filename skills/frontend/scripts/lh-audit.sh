@@ -24,8 +24,8 @@
 # Exit: 0 audited or skipped; 1 Lighthouse missing or a run failed;
 #       2 usage error or bad git ref.
 #
-# Requires: node, Google Chrome, and the `lighthouse` CLI on PATH (install it
-# yourself, e.g. `npm install -g lighthouse@13.5.0`; this script never downloads it).
+# Requires: node, Google Chrome, and the `lighthouse` CLI on PATH. Install
+# Lighthouse 13.5.0 yourself from its npm package; this script never downloads it.
 # Outputs timestamped JSON + HTML per form-factor into <outdir> and prints:
 #   category scores (Perf/A11y/BP/SEO), the Core Web Vitals metrics, and the top
 #   opportunities/diagnostics ranked by estimated savings.
@@ -112,7 +112,7 @@ if [ "$has_since" -eq 1 ]; then
 fi
 
 command -v lighthouse >/dev/null 2>&1 || {
-  echo "lh-audit.sh: the lighthouse CLI is not on PATH; install it first (e.g. npm install -g lighthouse@13.5.0)" >&2
+  echo "lh-audit.sh: the lighthouse CLI is not on PATH; install Lighthouse 13.5.0 yourself, then re-run" >&2
   exit 1
 }
 

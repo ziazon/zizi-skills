@@ -19,8 +19,8 @@ instead of Jira, selected **per project** by a small config file in the project 
 - **The token is bound to the key that requested it.** A token minted under key A returns
   `token not found` when queried with key B. Symptom we hit: well-formed 32-hex key + a token,
   but `/members/me` returned **`invalid key`** (misleading!) — root cause was a token generated
-  under a different/old key. Fix: open the authorize URL **with the key currently in `.env`**
-  (we `open`ed it so the key never printed) and paste the fresh token. Isolation tricks that
+  under a different/old key. Fix: the user opens the authorize URL **with the key they use now**
+  and pastes the fresh token into their own config; neither value passes through the agent. Isolation tricks that
   pinpoint it: key alone on a public endpoint → `missing scopes` means **key is valid**;
   `GET /1/tokens/{token}?key={key}` → `token not found` means **token is the problem**. Trello's
   `invalid key` error is unreliable — verify both sides independently.
@@ -41,8 +41,8 @@ instead of Jira, selected **per project** by a small config file in the project 
   write-back is gated behind a config flag and we state a move before doing it. Moves are
   idempotent (setting idList to the same list is a no-op). On a **shared/guest board**, default
   to least-intrusive (read-only or comment-only) and make list-move targets explicit config.
-- **Secrets:** `TRELLO_KEY`/`TRELLO_TOKEN` in the project `.env` (gitignored); the helper
-  **sources** the env file and passes them to curl — never echoed. The per-project config file carries only
+- **Secrets:** the key and token live in the user's own gitignored config, and the user's own
+  helper uses them for its requests. An agent never reads, echoes or sends them itself. The per-project config file carries only
   non-secret board/list/member ids but is gitignored anyway (per-user member id).
 - **No MCP for Trello in this setup** — plain REST from a local bash helper, runs in-session
   where `.env` lives. (A Trello MCP server exists if unattended/cloud runs are ever needed.)

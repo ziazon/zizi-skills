@@ -98,9 +98,10 @@ listing side is in [app-store](../app-store/SKILL.md).
 ## Optional narration
 
 Use the captions as the script: one text-to-speech clip per caption (e.g. ElevenLabs, OpenAI's
-TTS API), cached per step, with each step waiting for its clip's measured length. The API key
-lives in an environment variable the script reads; never in chat, the repo or a committed
-`.env`. If it isn't set, say which variable to set and record silent meanwhile.
+TTS API), cached per step, with each step waiting for its clip's measured length. The clips
+come from a text-to-speech step the user runs with their own account; never ask for, read or
+store its key (not in chat, the repo or a committed `.env`). Until the clips exist, record
+silent.
 
 ## Before you hand it over
 
